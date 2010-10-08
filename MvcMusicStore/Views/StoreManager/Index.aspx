@@ -1,16 +1,12 @@
-﻿<%@ Page Language="C#" MasterPageFile="~/Views/Shared/Site.Master" Inherits="System.Web.Mvc.ViewPage<IEnumerable<MvcMusicStore.Models.Album>>" %>
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Views/Shared/Site.Master" Inherits="System.Web.Mvc.ViewPage<IEnumerable<MvcMusicStore.Models.Album>>" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
-	Store Manager - All Albums
+	Index
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
 
-    <h2>Albums</h2>
-
-    <p>
-        <%: Html.ActionLink("Create New Album", "Create") %>
-    </p>
+    <h2>Index</h2>
 
     <table>
         <tr>
@@ -34,6 +30,10 @@
     <% } %>
 
     </table>
+
+    <p>
+        <%: Html.ActionLink("Create New", "Create") %>
+    </p>
 
 </asp:Content>
 

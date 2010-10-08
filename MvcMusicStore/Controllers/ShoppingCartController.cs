@@ -2,8 +2,6 @@
 using System.Web.Mvc;
 using MvcMusicStore.Models;
 using MvcMusicStore.ViewModels;
-using System.Collections.Generic;
-using System.Collections.Specialized;
 
 namespace MvcMusicStore.Controllers
 {
@@ -66,12 +64,13 @@ namespace MvcMusicStore.Controllers
             cart.RemoveFromCart(id);
 
             // Display the confirmation message
-            var results = new ShoppingCartRemoveViewModel { 
-                Message = Server.HtmlEncode(albumName) + 
+            var results = new ShoppingCartRemoveViewModel
+            {
+                Message = Server.HtmlEncode(albumName) +
                     " has been removed from your shopping cart.",
                 CartTotal = cart.GetTotal(),
                 CartCount = cart.GetCount(),
-                DeleteId = id 
+                DeleteId = id
             };
 
             return Json(results);

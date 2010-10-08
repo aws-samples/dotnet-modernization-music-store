@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Web.Mvc;
 using MvcMusicStore.Models;
-using MvcMusicStore.ViewModels;
 
 namespace MvcMusicStore.Controllers
 {
@@ -31,7 +30,7 @@ namespace MvcMusicStore.Controllers
 
             try
             {
-                if (string.Equals(values["PromoCode"], PromoCode, 
+                if (string.Equals(values["PromoCode"], PromoCode,
                     StringComparison.OrdinalIgnoreCase) == false)
                 {
                     return View(order);
@@ -49,7 +48,7 @@ namespace MvcMusicStore.Controllers
                     var cart = ShoppingCart.GetCart(this.HttpContext);
                     cart.CreateOrder(order);
 
-                    return RedirectToAction("Complete", 
+                    return RedirectToAction("Complete",
                         new { id = order.OrderId });
                 }
 

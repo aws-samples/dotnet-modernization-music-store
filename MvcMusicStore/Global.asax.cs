@@ -17,15 +17,9 @@ namespace MvcMusicStore
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
             routes.MapRoute(
-                "Browse",                                                // Route name
-                "Store/Browse/{genre}",                                  // URL with parameters
-                new { controller = "Store", action = "Browse", id = "" } // Parameter defaults
-            );
-
-            routes.MapRoute(
-                "Default",                                              // Route name
-                "{controller}/{action}/{id}",                           // URL with parameters
-                new { controller = "Home", action = "Index", id = "" }  // Parameter defaults
+                "Default", // Route name
+                "{controller}/{action}/{id}", // URL with parameters
+                new { controller = "Home", action = "Index", id = UrlParameter.Optional } // Parameter defaults
             );
 
         }

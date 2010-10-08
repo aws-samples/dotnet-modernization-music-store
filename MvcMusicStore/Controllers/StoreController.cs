@@ -1,7 +1,10 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
 using System.Web.Mvc;
-using MvcMusicStore.Models;
 using MvcMusicStore.ViewModels;
+using MvcMusicStore.Models;
 
 namespace MvcMusicStore.Controllers
 {
@@ -34,7 +37,7 @@ namespace MvcMusicStore.Controllers
 
         public ActionResult Browse(string genre)
         {
-            // Retrieve Genre from database
+            // Retrieve Genre and its Associated Albums from database
             var genreModel = storeDB.Genres.Include("Albums")
                 .Single(g => g.Name == genre);
 
@@ -52,8 +55,7 @@ namespace MvcMusicStore.Controllers
 
         public ActionResult Details(int id)
         {
-            var album = storeDB.Albums
-                .Single(a => a.AlbumId == id);
+            var album = storeDB.Albums.Single(a => a.AlbumId == id);
 
             return View(album);
         }

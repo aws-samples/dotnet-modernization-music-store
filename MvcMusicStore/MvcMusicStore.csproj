@@ -6,12 +6,12 @@
     <ProductVersion>
     </ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{C83FE52C-47DD-4433-B34E-9C9D72BBFFA1}</ProjectGuid>
+    <ProjectGuid>{3C5D19F8-3ADE-4341-BA50-ADAD1A3FD960}</ProjectGuid>
     <ProjectTypeGuids>{F85E285D-A4E0-4152-9332-AB1D724D3325};{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MvcMusicStore</RootNamespace>
-    <AssemblyName>Mvc Music Store</AssemblyName>
+    <AssemblyName>MvcMusicStore</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
   </PropertyGroup>
@@ -52,10 +52,7 @@
     <Reference Include="System.Data.DataSetExtensions">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.Web.Mvc, Version=0.0.0.0, Culture=neutral">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\Program Files\Microsoft ASP.NET\ASP.NET MVC 2\\Assemblies\System.Web.Mvc.dll</HintPath>
-    </Reference>
+    <Reference Include="System.Web.Mvc, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -69,7 +66,6 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Web.Services" />
     <Reference Include="System.EnterpriseServices" />
-    <Reference Include="System.Web.Mobile" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\AccountController.cs" />
@@ -91,50 +87,34 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>StoreDB.edmx</DependentUpon>
     </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ViewModels\ShoppingCartRemoveViewModel.cs" />
     <Compile Include="ViewModels\ShoppingCartViewModel.cs" />
     <Compile Include="ViewModels\StoreBrowseViewModel.cs" />
-    <Compile Include="ViewModels\StoreDetailsViewModel.cs" />
     <Compile Include="ViewModels\StoreIndexViewModel.cs" />
     <Compile Include="ViewModels\StoreManagerViewModel.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="App_Data\ASPNETDB.MDF" />
-    <Content Include="App_Data\aspnetdb_log.ldf">
-      <DependentUpon>ASPNETDB.MDF</DependentUpon>
-    </Content>
     <Content Include="App_Data\MvcMusicStore.mdf" />
     <Content Include="App_Data\MvcMusicStore_log.ldf">
       <DependentUpon>MvcMusicStore.mdf</DependentUpon>
     </Content>
-    <Content Include="Content\Images\content_top_bg.jpg" />
-    <Content Include="Content\Images\header_bg.jpg" />
     <Content Include="Content\Images\home-showcase.png" />
     <Content Include="Content\Images\logo.png" />
     <Content Include="Content\Images\placeholder.gif" />
-    <Content Include="Content\Images\hover_link_bg.jpg" />
-    <Content Include="Content\Images\linkbar_bg.jpg" />
-    <Content Include="Content\Images\main_graphics.jpg" />
-    <Content Include="Content\Images\right_navbar_bg.jpg" />
-    <Content Include="Content\Images\shadow_left.jpg" />
-    <Content Include="Content\Site.css" />
     <Content Include="Global.asax" />
-    <Content Include="Scripts\jquery-1.4.1-vsdoc.js" />
-    <Content Include="Scripts\jquery-1.4.1.js" />
-    <Content Include="Scripts\jquery-1.4.1.min.js" />
+    <Content Include="Content\Site.css" />
     <Content Include="Views\Account\ChangePassword.aspx" />
     <Content Include="Views\Account\ChangePasswordSuccess.aspx" />
     <Content Include="Views\Account\LogOn.aspx" />
     <Content Include="Views\Account\Register.aspx" />
     <Content Include="Views\Checkout\AddressAndPayment.aspx" />
-    <Content Include="Views\Checkout\InvalidCart.aspx" />
-    <Content Include="Views\Shared\EditorTemplates\Album.ascx" />
-    <Content Include="Views\ShoppingCart\CartSummary.ascx" />
-    <Content Include="Views\Shared\Error.aspx" />
     <Content Include="Views\Checkout\Complete.aspx" />
-    <Content Include="Views\ShoppingCart\Index.aspx" />
     <Content Include="Views\Home\Index.aspx" />
+    <Content Include="Views\Shared\EditorTemplates\Album.ascx" />
+    <Content Include="Views\Shared\Error.aspx" />
+    <Content Include="Views\ShoppingCart\CartSummary.ascx" />
+    <Content Include="Views\ShoppingCart\Index.aspx" />
     <Content Include="Views\StoreManager\Create.aspx" />
     <Content Include="Views\StoreManager\Delete.aspx" />
     <Content Include="Views\StoreManager\Deleted.aspx" />
@@ -151,6 +131,9 @@
     <Content Include="Web.Release.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
+    <Content Include="Scripts\jquery-1.4.1.js" />
+    <Content Include="Scripts\jquery-1.4.1.min.js" />
+    <Content Include="Scripts\jquery-1.4.1-vsdoc.js" />
     <Content Include="Scripts\jquery.validate.js" />
     <Content Include="Scripts\jquery.validate.min.js" />
     <Content Include="Scripts\jquery.validate-vsdoc.js" />
@@ -160,18 +143,16 @@
     <Content Include="Scripts\MicrosoftMvcAjax.debug.js" />
     <Content Include="Scripts\MicrosoftMvcValidation.js" />
     <Content Include="Scripts\MicrosoftMvcValidation.debug.js" />
-    <Content Include="Views\Web.config">
-      <SubType>Designer</SubType>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Views\Shared\Site.Master" />
+    <Content Include="Views\Web.config" />
   </ItemGroup>
   <ItemGroup>
     <EntityDeploy Include="Models\StoreDB.edmx">
       <Generator>EntityModelCodeGenerator</Generator>
       <LastGenOutput>StoreDB.Designer.cs</LastGenOutput>
     </EntityDeploy>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Shared\Site.Master" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
@@ -189,7 +170,7 @@
         <WebProjectProperties>
           <UseIIS>False</UseIIS>
           <AutoAssignPort>False</AutoAssignPort>
-          <DevelopmentServerPort>1397</DevelopmentServerPort>
+          <DevelopmentServerPort>26641</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
           <IISUrl>
           </IISUrl>

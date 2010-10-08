@@ -1,7 +1,7 @@
 ﻿<%@ Page Language="C#" MasterPageFile="~/Views/Shared/Site.Master" Inherits="System.Web.Mvc.ViewPage<MvcMusicStore.Models.Order>" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
-    Shipping Address
+    Address and Payment
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
@@ -13,6 +13,8 @@
 
     <% Html.EnableClientValidation(); %>
     <% using (Html.BeginForm()) {%>
+
+    <h2>Address and Payment</h2>
 
     <fieldset>
         <legend>Shipping Information</legend>

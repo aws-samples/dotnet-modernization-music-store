@@ -1,11 +1,13 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
 using System.Web.Mvc;
 using MvcMusicStore.Models;
 using MvcMusicStore.ViewModels;
 
 namespace MvcMusicStore.Controllers
 {
-    [HandleError]
     [Authorize(Roles = "Administrator")]
     public class StoreManagerController : Controller
     {
@@ -20,7 +22,15 @@ namespace MvcMusicStore.Controllers
                 .Include("Genre").Include("Artist")
                 .ToList();
 
-            return View(storeDB.Albums);
+            return View(albums);
+        }
+
+        //
+        // GET: /StoreManager/Details/5
+
+        public ActionResult Details(int id)
+        {
+            return View();
         }
 
         // 
@@ -44,27 +54,25 @@ namespace MvcMusicStore.Controllers
         [HttpPost]
         public ActionResult Create(Album album)
         {
-            try
+            if (ModelState.IsValid)
             {
+
                 //Save Album
                 storeDB.AddToAlbums(album);
                 storeDB.SaveChanges();
 
-                return Redirect("/");
+                return RedirectToAction("Index");
             }
-            catch
+
+            // Invalid – redisplay with errors
+            var viewModel = new StoreManagerViewModel
             {
-                //Invalid - redisplay with errors
+                Album = album,
+                Genres = storeDB.Genres.ToList(),
+                Artists = storeDB.Artists.ToList()
+            };
 
-                var viewModel = new StoreManagerViewModel
-                {
-                    Album = album,
-                    Genres = storeDB.Genres.ToList(),
-                    Artists = storeDB.Artists.ToList()
-                };
-
-                return View(viewModel);
-            }
+            return View(viewModel);
         }
 
         //
@@ -101,6 +109,8 @@ namespace MvcMusicStore.Controllers
             }
             catch
             {
+                //Error occurred – so redisplay the form
+
                 var viewModel = new StoreManagerViewModel
                 {
                     Album = album,
@@ -121,9 +131,6 @@ namespace MvcMusicStore.Controllers
 
             return View(album);
         }
-
-        //
-        // POST: /StoreManager/Delete/5
 
         [HttpPost]
         public ActionResult Delete(int id, string confirmButton)

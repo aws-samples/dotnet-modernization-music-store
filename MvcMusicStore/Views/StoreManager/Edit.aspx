@@ -1,4 +1,5 @@
-﻿<%@ Page Language="C#" MasterPageFile="~/Views/Shared/Site.Master" Inherits="System.Web.Mvc.ViewPage<MvcMusicStore.ViewModels.StoreManagerViewModel>" %>
+﻿<%@ Page Language="C#" MasterPageFile="~/Views/Shared/Site.Master" 
+    Inherits="System.Web.Mvc.ViewPage<MvcMusicStore.ViewModels.StoreManagerViewModel>" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
 	Edit - <%: Model.Album.Title %>
@@ -11,10 +12,13 @@
     <% Html.EnableClientValidation(); %>
 
     <% using (Html.BeginForm()) {%>
-
+        <%: Html.ValidationSummary(true) %>
+        
     <fieldset>
         <legend>Edit Album</legend>
-        <%: Html.EditorFor(model => model.Album, new { Artists = Model.Artists, Genres = Model.Genres}) %>
+        <%: Html.EditorFor(model => model.Album, 
+            new { Artists = Model.Artists, Genres = Model.Genres}) %>
+
         <p>
             <input type="submit" value="Save" />
         </p>
@@ -23,8 +27,7 @@
     <% } %>
 
     <div>
-        <%:Html.ActionLink("Back to Albums", "Index") %>
+        <%: Html.ActionLink("Back to List", "Index") %>
     </div>
 
 </asp:Content>
-

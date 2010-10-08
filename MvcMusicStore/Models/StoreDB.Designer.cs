@@ -109,22 +109,6 @@ namespace MvcMusicStore.Models
         /// <summary>
         /// No Metadata Documentation available.
         /// </summary>
-        public ObjectSet<Genre> Genres
-        {
-            get
-            {
-                if ((_Genres == null))
-                {
-                    _Genres = base.CreateObjectSet<Genre>("Genres");
-                }
-                return _Genres;
-            }
-        }
-        private ObjectSet<Genre> _Genres;
-    
-        /// <summary>
-        /// No Metadata Documentation available.
-        /// </summary>
         public ObjectSet<Cart> Carts
         {
             get
@@ -137,6 +121,22 @@ namespace MvcMusicStore.Models
             }
         }
         private ObjectSet<Cart> _Carts;
+    
+        /// <summary>
+        /// No Metadata Documentation available.
+        /// </summary>
+        public ObjectSet<Genre> Genres
+        {
+            get
+            {
+                if ((_Genres == null))
+                {
+                    _Genres = base.CreateObjectSet<Genre>("Genres");
+                }
+                return _Genres;
+            }
+        }
+        private ObjectSet<Genre> _Genres;
     
         /// <summary>
         /// No Metadata Documentation available.
@@ -190,19 +190,19 @@ namespace MvcMusicStore.Models
         }
     
         /// <summary>
-        /// Deprecated Method for adding a new object to the Genres EntitySet. Consider using the .Add method of the associated ObjectSet&lt;T&gt; property instead.
-        /// </summary>
-        public void AddToGenres(Genre genre)
-        {
-            base.AddObject("Genres", genre);
-        }
-    
-        /// <summary>
         /// Deprecated Method for adding a new object to the Carts EntitySet. Consider using the .Add method of the associated ObjectSet&lt;T&gt; property instead.
         /// </summary>
         public void AddToCarts(Cart cart)
         {
             base.AddObject("Carts", cart);
+        }
+    
+        /// <summary>
+        /// Deprecated Method for adding a new object to the Genres EntitySet. Consider using the .Add method of the associated ObjectSet&lt;T&gt; property instead.
+        /// </summary>
+        public void AddToGenres(Genre genre)
+        {
+            base.AddObject("Genres", genre);
         }
     
         /// <summary>

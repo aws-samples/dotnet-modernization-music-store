@@ -7,7 +7,7 @@
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
 
     <div class="genre">
-        <p><strong><%: Model.Genre.Name %>:</strong> <%: Model.Genre.Description %></p>
+        <h3><em><%: Model.Genre.Name %></em> Albums</h3>
 
         <ul id="album-list">
             <% foreach (var album in Model.Albums) { %>

@@ -480,7 +480,10 @@ Sys.Mvc.FieldContext.prototype = {
         for (var i = 0; i < elements.length; i++) {
             var element = elements[i];
             if (Sys.Mvc._validationUtil.elementSupportsEvent(element, 'onpropertychange')) {
-                Sys.UI.DomEvent.addHandler(element, 'propertychange', this._onPropertyChangeHandler);
+                var compatMode = document.documentMode;
+                if (compatMode && compatMode >= 8) {
+                    Sys.UI.DomEvent.addHandler(element, 'propertychange', this._onPropertyChangeHandler);
+                }
             }
             else {
                 Sys.UI.DomEvent.addHandler(element, 'input', this._onInputHandler);

@@ -1,4 +1,5 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Views/Shared/Site.Master" Inherits="System.Web.Mvc.ViewPage<MvcMusicStore.ViewModels.ShoppingCartViewModel>" %>
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Views/Shared/Site.Master" 
+Inherits="System.Web.Mvc.ViewPage<MvcMusicStore.ViewModels.ShoppingCartViewModel>" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
     Shopping Cart
@@ -44,7 +45,8 @@
         <% foreach (var item in Model.CartItems) { %>
         <tr id="row-<%: item.RecordId %>">
             <td>
-                <%: Html.ActionLink(item.Album.Title, "Details", "Store", new { id = item.AlbumId }, null)%>
+                <%: Html.ActionLink(item.Album.Title, "Details", "Store", 
+                    new { id = item.AlbumId }, null)%>
             </td>
             <td>
                 <%: item.Album.Price %>
@@ -53,7 +55,9 @@
                 <%: item.Count %>
             </td>
             <td>
-                <%: Ajax.ActionLink("Remove from cart", "RemoveFromCart", new { id = item.RecordId }, new AjaxOptions { OnSuccess = "handleUpdate" })%>
+                <%: Ajax.ActionLink("Remove from cart", "RemoveFromCart", 
+                    new { id = item.RecordId }, 
+                    new AjaxOptions { OnSuccess = "handleUpdate" })%>
             </td>
         </tr>
         <% } %>

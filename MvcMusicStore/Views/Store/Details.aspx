@@ -6,11 +6,15 @@
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
 
-    <div id="album-details">
-        <h3>
-            <%: Model.Title %>
-        </h3>
+    <h2>
+        <%: Model.Title %>
+    </h2>
+
+    <p>
         <img alt="<%: Model.Title %>" src="<%: Model.AlbumArtUrl %>" />
+    </p>
+
+    <div id="album-details">
         <p>
             <em>Genre:</em>
             <%: Model.Genre.Name %>
@@ -24,7 +28,8 @@
             <%: String.Format("{0:F}", Model.Price) %>
         </p>
         <p class="button">
-            <%: Html.ActionLink("Add to cart", "AddToCart", "ShoppingCart", new { id = Model.AlbumId }, "")%>
+            <%: Html.ActionLink("Add to cart", "AddToCart", "ShoppingCart", 
+                new { id = Model.AlbumId }, "")%>
         </p>
     </div>
 
