@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using MvcMusicStore.ViewModels;
 using MvcMusicStore.Models;
 
 namespace MvcMusicStore.Controllers
@@ -17,23 +16,13 @@ namespace MvcMusicStore.Controllers
 
         public ActionResult Index()
         {
-            // Retrieve list of Genres from database
-            var genres = from genre in storeDB.Genres
-                         select genre.Name;
+            var genres = storeDB.Genres.ToList();
 
-            // Set up our ViewModel
-            var viewModel = new StoreIndexViewModel()
-            {
-                Genres = genres.ToList(),
-                NumberOfGenres = genres.Count()
-            };
-
-            // Return the view
-            return View(viewModel);
+            return View(genres);
         }
 
         //
-        // GET: /Store/Browse?Genre=Disco
+        // GET: /Store/Browse?genre=?Disco
 
         public ActionResult Browse(string genre)
         {
@@ -41,13 +30,7 @@ namespace MvcMusicStore.Controllers
             var genreModel = storeDB.Genres.Include("Albums")
                 .Single(g => g.Name == genre);
 
-            var viewModel = new StoreBrowseViewModel()
-            {
-                Genre = genreModel,
-                Albums = genreModel.Albums.ToList()
-            };
-
-            return View(viewModel);
+            return View(genreModel);
         }
 
         //
@@ -55,7 +38,7 @@ namespace MvcMusicStore.Controllers
 
         public ActionResult Details(int id)
         {
-            var album = storeDB.Albums.Single(a => a.AlbumId == id);
+            var album = storeDB.Albums.Find(id);
 
             return View(album);
         }
@@ -68,7 +51,7 @@ namespace MvcMusicStore.Controllers
         {
             var genres = storeDB.Genres.ToList();
 
-            return View(genres);
+            return PartialView(genres);
         }
     }
 }

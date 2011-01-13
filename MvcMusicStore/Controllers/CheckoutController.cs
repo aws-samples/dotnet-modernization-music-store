@@ -21,41 +21,49 @@ namespace MvcMusicStore.Controllers
 
         //
         // POST: /Checkout/AddressAndPayment
-
         [HttpPost]
         public ActionResult AddressAndPayment(FormCollection values)
         {
             var order = new Order();
-            TryUpdateModel(order);
 
             try
             {
-                if (string.Equals(values["PromoCode"], PromoCode,
+                // Updat the model
+                UpdateModel(order);
+
+                if (string.Equals(values["PromoCode"], 
+                    PromoCode, 
                     StringComparison.OrdinalIgnoreCase) == false)
                 {
                     return View(order);
                 }
                 else
                 {
-                    order.Username = User.Identity.Name;
-                    order.OrderDate = DateTime.Now;
+                    if (ModelState.IsValid)
+                    {
+                        // Promo Code supplied
+                        order.Username = User.Identity.Name;
+                        order.OrderDate = DateTime.Now;
 
-                    //Save Order
-                    storeDB.AddToOrders(order);
-                    storeDB.SaveChanges();
+                        // Save Order
+                        storeDB.Orders.Add(order);
+                        storeDB.SaveChanges();
 
-                    //Process the order
-                    var cart = ShoppingCart.GetCart(this.HttpContext);
-                    cart.CreateOrder(order);
+                        // Process the order
+                        var cart = ShoppingCart.GetCart(this);
+                        cart.CreateOrder(order);
 
-                    return RedirectToAction("Complete",
-                        new { id = order.OrderId });
+                        return RedirectToAction("Complete", new { id = order.OrderId });
+                    }
+                    else
+                    {
+                        throw new Exception("Model State is not valid!");
+                    }
                 }
-
             }
             catch
             {
-                //Invalid - redisplay with errors
+                // Invalid -- redisplay with errors
                 return View(order);
             }
         }
@@ -65,10 +73,9 @@ namespace MvcMusicStore.Controllers
 
         public ActionResult Complete(int id)
         {
-            // Validate customer owns this order
+            // Validate that the customer owns this order
             bool isValid = storeDB.Orders.Any(
-                o => o.OrderId == id &&
-                o.Username == User.Identity.Name);
+                o => o.OrderId == id && o.Username == User.Identity.Name);
 
             if (isValid)
             {

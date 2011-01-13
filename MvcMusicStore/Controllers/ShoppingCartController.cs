@@ -59,9 +59,8 @@ namespace MvcMusicStore.Controllers
             string albumName = storeDB.Carts
                 .Single(item => item.RecordId == id).Album.Title;
 
-            // Remove from cart. Note that for simplicity, we're 
-            // removing all rather than decrementing the count.
-            cart.RemoveFromCart(id);
+            // Remove from cart
+            int itemCount = cart.RemoveFromCart(id);
 
             // Display the confirmation message
             var results = new ShoppingCartRemoveViewModel
@@ -70,6 +69,7 @@ namespace MvcMusicStore.Controllers
                     " has been removed from your shopping cart.",
                 CartTotal = cart.GetTotal(),
                 CartCount = cart.GetCount(),
+                ItemCount = itemCount,
                 DeleteId = id
             };
 
