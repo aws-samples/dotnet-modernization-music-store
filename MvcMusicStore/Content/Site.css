@@ -50,6 +50,7 @@ ul li a
 {
 	overflow: hidden;
 	padding: 0 0 15px 10px;
+	float: left;
 }
 
 ul

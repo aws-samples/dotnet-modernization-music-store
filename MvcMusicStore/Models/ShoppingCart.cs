@@ -131,7 +131,7 @@ namespace MvcMusicStore.Models
             // Iterate over the items in the cart, adding the order details for each
             foreach (var item in cartItems)
             {
-                var orderDetails = new OrderDetail
+                var orderDetail = new OrderDetail
                 {
                     AlbumId = item.AlbumId,
                     OrderId = order.OrderId,
@@ -141,6 +141,8 @@ namespace MvcMusicStore.Models
 
                 // Set the order total of the shopping cart
                 orderTotal += (item.Count * item.Album.Price);
+
+                storeDB.OrderDetails.Add(orderDetail);
             }
 
             // Set the order's total to the orderTotal count
