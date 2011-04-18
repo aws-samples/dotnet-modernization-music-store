@@ -1,4 +1,4 @@
-*
+﻿*
 {
 	margin: 0px;
 	padding: 0px;
@@ -263,19 +263,36 @@ div.editor-field
 	margin-bottom: 10px;
 }
 
-label
-{
-    display: block;
-    width: 300px;
-}
-
 input[type=text], input[type=password], select
 {
 	border: 1px solid #8A8575;
 	width: 300px;
 }
 
-/* Begin: Tables */
+/* Styles for validation helpers */
+.field-validation-error {
+    color: #ff0000;
+}
+
+.field-validation-valid {
+    display: none;
+}
+
+.input-validation-error {
+    border: 1px solid #ff0000;
+    background-color: #ffeeee;
+}
+
+.validation-summary-errors {
+    font-weight: bold;
+    color: #ff0000;
+}
+
+.validation-summary-valid {
+    display: none;
+}
+
+/* Tables */
 table
 {
 	border: 1px solid #000;
@@ -307,33 +324,4 @@ th, td
 tr:hover
 {
 	background-color: #fff;
-}
-
-/* Styles for validation helpers
------------------------------------------------------------*/
-.field-validation-error
-{
-    color: #ff0000;
-}
-
-.field-validation-valid
-{
-    display: none;
-}
-
-.input-validation-error
-{
-    border: 1px solid #ff0000;
-    background-color: #ffeeee;
-}
-
-.validation-summary-errors
-{
-    font-weight: bold;
-    color: #ff0000;
-}
-
-.validation-summary-valid
-{
-    display: none;
 }

@@ -22,7 +22,7 @@ namespace MvcMusicStore.Controllers
         }
 
         //
-        // GET: /Store/Browse?genre=?Disco
+        // GET: /Store/Browse?genre=Disco
 
         public ActionResult Browse(string genre)
         {
@@ -53,5 +53,6 @@ namespace MvcMusicStore.Controllers
 
             return PartialView(genres);
         }
+
     }
 }

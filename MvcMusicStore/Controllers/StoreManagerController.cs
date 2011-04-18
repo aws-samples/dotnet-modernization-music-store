@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.Entity;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -10,18 +12,24 @@ namespace MvcMusicStore.Controllers
     [Authorize(Roles = "Administrator")]
     public class StoreManagerController : Controller
     {
-        MusicStoreEntities storeDB = new MusicStoreEntities();
+        private MusicStoreEntities db = new MusicStoreEntities();
 
         //
         // GET: /StoreManager/
 
-        public ActionResult Index()
+        public ViewResult Index()
         {
-            var albums = storeDB.Albums
-                .Include("Genre").Include("Artist")
-                .ToList();
+            var albums = db.Albums.Include(a => a.Genre).Include(a => a.Artist);
+            return View(albums.ToList());
+        }
 
-            return View(albums);
+        //
+        // GET: /StoreManager/Details/5
+
+        public ViewResult Details(int id)
+        {
+            Album album = db.Albums.Find(id);
+            return View(album);
         }
 
         //
@@ -29,12 +37,9 @@ namespace MvcMusicStore.Controllers
 
         public ActionResult Create()
         {
-            ViewBag.Genres = storeDB.Genres.OrderBy(g => g.Name).ToList();
-            ViewBag.Artists = storeDB.Artists.OrderBy(a => a.Name).ToList();
-
-            var album = new Album();
-
-            return View(album);
+            ViewBag.GenreId = new SelectList(db.Genres, "GenreId", "Name");
+            ViewBag.ArtistId = new SelectList(db.Artists, "ArtistId", "Name");
+            return View();
         } 
 
         //
@@ -45,32 +50,24 @@ namespace MvcMusicStore.Controllers
         {
             if (ModelState.IsValid)
             {
-
-                //Save Album
-                storeDB.Albums.Add(album);
-                storeDB.SaveChanges();
-
-                return RedirectToAction("Index");
-
+                db.Albums.Add(album);
+                db.SaveChanges();
+                return RedirectToAction("Index");  
             }
 
-            // Invalid – redisplay with errors
-            ViewBag.Genres = storeDB.Genres.OrderBy(g => g.Name).ToList();
-            ViewBag.Artists = storeDB.Artists.OrderBy(a => a.Name).ToList();
-
+            ViewBag.GenreId = new SelectList(db.Genres, "GenreId", "Name", album.GenreId);
+            ViewBag.ArtistId = new SelectList(db.Artists, "ArtistId", "Name", album.ArtistId);
             return View(album);
         }
         
         //
         // GET: /StoreManager/Edit/5
-
+ 
         public ActionResult Edit(int id)
         {
-            ViewBag.Genres = storeDB.Genres.OrderBy(g => g.Name).ToList();
-            ViewBag.Artists = storeDB.Artists.OrderBy(a => a.Name).ToList();
-
-            var album = storeDB.Albums.Single(a => a.AlbumId == id);
-
+            Album album = db.Albums.Find(id);
+            ViewBag.GenreId = new SelectList(db.Genres, "GenreId", "Name", album.GenreId);
+            ViewBag.ArtistId = new SelectList(db.Artists, "ArtistId", "Name", album.ArtistId);
             return View(album);
         }
 
@@ -78,19 +75,17 @@ namespace MvcMusicStore.Controllers
         // POST: /StoreManager/Edit/5
 
         [HttpPost]
-        public ActionResult Edit(int id, FormCollection collection)
+        public ActionResult Edit(Album album)
         {
-            var album = storeDB.Albums.Find(id);
-
-            if(TryUpdateModel(album))
+            if (ModelState.IsValid)
             {
-                storeDB.SaveChanges();
+                db.Entry(album).State = EntityState.Modified;
+                db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            else
-            {
-                return View(album);
-            }
+            ViewBag.GenreId = new SelectList(db.Genres, "GenreId", "Name", album.GenreId);
+            ViewBag.ArtistId = new SelectList(db.Artists, "ArtistId", "Name", album.ArtistId);
+            return View(album);
         }
 
         //
@@ -98,23 +93,26 @@ namespace MvcMusicStore.Controllers
  
         public ActionResult Delete(int id)
         {
-            var album = storeDB.Albums.Find(id);
-
+            Album album = db.Albums.Find(id);
             return View(album);
         }
 
         //
         // POST: /StoreManager/Delete/5
 
-        [HttpPost]
-        public ActionResult Delete(int id, FormCollection collection)
+        [HttpPost, ActionName("Delete")]
+        public ActionResult DeleteConfirmed(int id)
+        {            
+            Album album = db.Albums.Find(id);
+            db.Albums.Remove(album);
+            db.SaveChanges();
+            return RedirectToAction("Index");
+        }
+
+        protected override void Dispose(bool disposing)
         {
-            var album = storeDB.Albums.Find(id);
-
-            storeDB.Albums.Remove(album);
-            storeDB.SaveChanges();
-
-            return View("Deleted");
+            db.Dispose();
+            base.Dispose(disposing);
         }
     }
 }

@@ -30,7 +30,9 @@ namespace MvcMusicStore.Models
         public void AddToCart(Album album)
         {
             // Get the matching cart and album instances
-            var cartItem = storeDB.Carts.SingleOrDefault(c => c.CartId == ShoppingCartId && c.AlbumId == album.AlbumId);
+            var cartItem = storeDB.Carts.SingleOrDefault(
+c => c.CartId == ShoppingCartId
+&& c.AlbumId == album.AlbumId);
 
             if (cartItem == null)
             {
@@ -59,8 +61,8 @@ namespace MvcMusicStore.Models
         {
             // Get the cart
             var cartItem = storeDB.Carts.Single(
-                cart => cart.CartId == ShoppingCartId 
-                && cart.RecordId == id);
+cart => cart.CartId == ShoppingCartId
+&& cart.RecordId == id);
 
             int itemCount = 0;
 
@@ -114,8 +116,9 @@ namespace MvcMusicStore.Models
 
         public decimal GetTotal()
         {
-            // Multiply album price by count of that album to get the current price for each of those albums in the cart
-            //sum all album price totals to get the cart total
+            // Multiply album price by count of that album to get 
+            // the current price for each of those albums in the cart
+            // sum all album price totals to get the cart total
             decimal? total = (from cartItems in storeDB.Carts
                               where cartItems.CartId == ShoppingCartId
                               select (int?)cartItems.Count * cartItems.Album.Price).Sum();
@@ -143,6 +146,7 @@ namespace MvcMusicStore.Models
                 orderTotal += (item.Count * item.Album.Price);
 
                 storeDB.OrderDetails.Add(orderDetail);
+
             }
 
             // Set the order's total to the orderTotal count
