@@ -70,7 +70,9 @@ namespace Mvc3ToolsUpdateWeb_Default.Controllers
         {
             FormsAuthentication.SignOut();
 
-            return RedirectToAction("Index", "Home");
+            Session.Abandon();
+
+            return RedirectToAction("Logon", "Account");
         }
 
         //
