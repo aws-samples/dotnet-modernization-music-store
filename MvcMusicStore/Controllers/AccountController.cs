@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
-using System.Web.Routing;
-using System.Web.Security;
-using Mvc3ToolsUpdateWeb_Default.Models;
+﻿using MvcMusicStore.Models;
 using MvcMusicStore.Models;
+using System;
+using System.Web.Mvc;
+using System.Web.Security;
 
-namespace Mvc3ToolsUpdateWeb_Default.Controllers
+namespace MvcMusicStore.Controllers
 {
     public class AccountController : Controller
     {
@@ -40,8 +36,8 @@ namespace Mvc3ToolsUpdateWeb_Default.Controllers
             {
                 if (Membership.ValidateUser(model.UserName, model.Password))
                 {
-                    MigrateShoppingCart(model.UserName); 
-                    
+                    MigrateShoppingCart(model.UserName);
+
                     FormsAuthentication.SetAuthCookie(model.UserName, model.RememberMe);
                     if (Url.IsLocalUrl(returnUrl) && returnUrl.Length > 1 && returnUrl.StartsWith("/")
                         && !returnUrl.StartsWith("//") && !returnUrl.StartsWith("/\\"))
@@ -97,8 +93,8 @@ namespace Mvc3ToolsUpdateWeb_Default.Controllers
 
                 if (createStatus == MembershipCreateStatus.Success)
                 {
-                    MigrateShoppingCart(model.UserName); 
-                    
+                    MigrateShoppingCart(model.UserName);
+
                     FormsAuthentication.SetAuthCookie(model.UserName, false /* createPersistentCookie */);
                     return RedirectToAction("Index", "Home");
                 }

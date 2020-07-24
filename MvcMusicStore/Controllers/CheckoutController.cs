@@ -1,7 +1,7 @@
-﻿using System;
+﻿using MvcMusicStore.Models;
+using System;
 using System.Linq;
 using System.Web.Mvc;
-using MvcMusicStore.Models;
 
 namespace MvcMusicStore.Controllers
 {

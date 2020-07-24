@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using MvcMusicStore.Models;
+﻿using MvcMusicStore.Models;
+using System.Collections.Generic;
 
 namespace MvcMusicStore.ViewModels
 {
