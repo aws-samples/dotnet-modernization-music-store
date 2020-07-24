@@ -1,5 +1,4 @@
 ﻿using MvcMusicStore.Models;
-using MvcMusicStore.Models;
 using System;
 using System.Web.Mvc;
 using System.Web.Security;
