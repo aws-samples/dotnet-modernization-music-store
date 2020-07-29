@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" modified="2020-07-29T13:09:29.199Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36" etag="n9Xso6Ta8HWWjAEcl6V7" version="13.5.5" type="github">
+<mxfile host="app.diagrams.net" modified="2020-07-29T13:22:21.715Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36" etag="hRS8KE4nre1B3uIvr8Eb" version="13.5.5" type="github">
   <diagram id="gPHuf9VsB1EnmT0cgGwY" name="Page-1">
-    <mxGraphModel dx="1822" dy="794" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="1822" dy="794" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" background="none" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -79,7 +79,7 @@
         <mxCell id="P4rQuA9o9oAKyjK2VUAx-33" value="Modernize" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;fontSize=16;" vertex="1" parent="1">
           <mxGeometry x="427.5" y="389" width="85" height="23" as="geometry" />
         </mxCell>
-        <mxCell id="P4rQuA9o9oAKyjK2VUAx-34" value=".Net Core 4.0 MVC App" style="swimlane;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+        <mxCell id="P4rQuA9o9oAKyjK2VUAx-34" value=".Net Core MVC App" style="swimlane;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
           <mxGeometry x="594" y="229" width="200" height="200" as="geometry">
             <mxRectangle x="135" y="240" width="160" height="23" as="alternateBounds" />
           </mxGeometry>
