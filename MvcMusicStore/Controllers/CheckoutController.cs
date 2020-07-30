@@ -1,15 +1,25 @@
 ﻿using MvcMusicStore.Models;
 using System;
 using System.Linq;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
 
 namespace MvcMusicStore.Controllers
 {
     [Authorize]
     public class CheckoutController : Controller
     {
-        MusicStoreEntities storeDB = new MusicStoreEntities();
         const string PromoCode = "FREE";
+        private readonly MusicStoreEntities storeDB;
+        private readonly ShoppingCart shoppingCart;
+
+        public CheckoutController(MusicStoreEntities musicStoreEntities, ShoppingCart shoppingCart)
+        {
+            storeDB = musicStoreEntities;
+            this.shoppingCart = shoppingCart;
+        }
 
         //
         // GET: /Checkout/AddressAndPayment
@@ -23,10 +33,10 @@ namespace MvcMusicStore.Controllers
         // POST: /Checkout/AddressAndPayment
 
         [HttpPost]
-        public ActionResult AddressAndPayment(FormCollection values)
+        public async Task<ActionResult> AddressAndPayment(IFormCollection values)
         {
             var order = new Order();
-            TryUpdateModel(order);
+            await TryUpdateModelAsync(order);
 
             try
             {
@@ -45,7 +55,7 @@ namespace MvcMusicStore.Controllers
                     storeDB.SaveChanges();
 
                     //Process the order
-                    var cart = ShoppingCart.GetCart(this.HttpContext);
+                    var cart = shoppingCart;
                     cart.CreateOrder(order);
 
                     return RedirectToAction("Complete",

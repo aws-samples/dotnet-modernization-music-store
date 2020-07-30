@@ -1,14 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace MvcMusicStore.Models
 {
-    [Bind(Exclude = "AlbumId")]
+    [Bind]
     public class Album
     {
         [ScaffoldColumn(false)]
+        [BindNever]
         public int AlbumId { get; set; }
 
         [DisplayName("Genre")]

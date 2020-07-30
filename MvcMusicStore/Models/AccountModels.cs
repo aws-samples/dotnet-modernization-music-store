@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Web.Mvc;
-using Compare = System.ComponentModel.DataAnnotations.CompareAttribute;
+using Microsoft.AspNetCore.Mvc;
 
 namespace MvcMusicStore.Models
 {

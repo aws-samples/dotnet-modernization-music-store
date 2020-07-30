@@ -1,0 +1,16 @@
+﻿version: '3.4'
+services:
+  coreapi:
+    image: ${DOCKER_REGISTRY-}webfrontend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 5001:80
+  db:
+    image: mcr.microsoft.com/mssql/server
+    environment:
+      SA_PASSWORD: "P@ssword1"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1601:1433"
