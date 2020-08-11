@@ -30,7 +30,7 @@ body
 {
 	font-size: 18px;
 	float: left;
-	background: url(/content/Images/logo.png) no-repeat;
+	background: url(/Content/Images/logo.png) no-repeat;
 	padding: 45px 0px 5px 0px;
 }
 
@@ -38,7 +38,7 @@ body
 {
 	height: 300px; 
 	width: 700px; 
-	background: url(/content/Images/home-showcase.png) no-repeat;
+	background: url(/Content/Images/home-showcase.png) no-repeat;
 }
 
 ul li a
