@@ -1,12 +1,17 @@
 ﻿version: '3.4'
 services:
-  coreapi:
+  coreweb:
     image: ${DOCKER_REGISTRY-}webfrontend
     build:
       context: .
       dockerfile: Dockerfile
+    environment:
+      - ConnectionStrings__MusicStoreEntities=Server=db;Initial Catalog=MusicStore;User Id=sa;Password=P@ssword1
+      - ConnectionStrings__IdentityConnection=Server=db;Initial Catalog=identity;User Id=sa;Password=P@ssword1
     ports:
       - 5001:80
+    depends_on:
+      - db
   db:
     image: mcr.microsoft.com/mssql/server
     environment:

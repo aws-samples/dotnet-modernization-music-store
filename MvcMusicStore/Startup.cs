@@ -53,6 +53,17 @@ namespace MvcMusicStoreCore
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+
+            using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
+            {
+                // EF Core
+                var context = serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                context.Database.Migrate();
+
+                // EF 6.4 (MusicStore)
+                System.Data.Entity.Database.SetInitializer(new MvcMusicStore.Models.SampleData());
+            }
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
