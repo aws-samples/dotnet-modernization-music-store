@@ -1,0 +1,9 @@
+{
+  "app": "dotnet run -p MusicStoreInfra.csproj",
+  "context": {
+    "@aws-cdk/core:enableStackNameDuplicates": "true",
+    "aws-cdk:enableDiffNoFail": "true",
+    "@aws-cdk/core:stackRelativeExports": "true",
+    "dbUsername":  "sa"
+  }
+}
