@@ -15,7 +15,7 @@ This library is licensed under the Apache 2.0 License
 5. MS SQL Server (LocalDB version is perfectly suitable with appropriate connection string adjustments).
 6. Git for Windows.
 
-## Checking out source code.
+## Checking out source code
 
 In a directory of your choice, please run
 
@@ -23,7 +23,7 @@ In a directory of your choice, please run
 git clone https://github.com/aws-samples/Dotnet-modernization-music-store.git
 ```
 
-## Set up Membership Schema and database to manage Users.
+## Set up Membership Schema and database to manage Users
 
 * Open Powershell and run the below script. This script will create a SQL Server database named "Identity" on your local machine to manage Users, Roles, and Claims using [Membership Provider](https://docs.microsoft.com/en-us/previous-versions/aspnet/tw292whz(v=vs.100)). (SQL Server is expected to be available at (local) address).
 
