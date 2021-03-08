@@ -47,8 +47,6 @@ namespace MvcMusicStoreCore
                 options.TableName = "MusicStoreCache";
             });
 
-            services.AddDistributedMemoryCache();
-
             services.AddSession();
             
             services.AddScoped<ShoppingCart>();
