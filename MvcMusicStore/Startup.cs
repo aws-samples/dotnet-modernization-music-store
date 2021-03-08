@@ -60,14 +60,9 @@ namespace MvcMusicStoreCore
 
             services.ConfigureApplicationCookie(options => options.LoginPath = "/Account/Logon");
 
-            // Add a DbContext to store your Database Keys
-            services.AddDbContext<DataProtectionKeysContext>(options =>
-                options.UseSqlServer(
-                    Configuration.GetConnectionString("IdentityConnection")));
-
             // using Microsoft.AspNetCore.DataProtection;
             services.AddDataProtection()
-                .PersistKeysToDbContext<DataProtectionKeysContext>();
+                .PersistKeysToDbContext<ApplicationDbContext>();
 
             services.AddScoped<IPasswordHasher<User>, SQLPasswordHasher<User>>();
         }
@@ -82,10 +77,6 @@ namespace MvcMusicStoreCore
                     // EF Core
                     var context = serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                     context.Database.Migrate();
-
-                    //Data protection keys
-                    var dataProtectionKeysContext = serviceScope.ServiceProvider.GetRequiredService<DataProtectionKeysContext>();
-                    dataProtectionKeysContext.Database.Migrate();
 
                     // EF 6.4 (MusicStore)
                     System.Data.Entity.Database.SetInitializer(new MvcMusicStore.Models.SampleData());

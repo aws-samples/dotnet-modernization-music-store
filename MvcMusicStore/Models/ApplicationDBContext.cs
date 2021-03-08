@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MvcMusicStore.Models
 {
-    public class ApplicationDbContext : IdentityDbContext<User>
+    public class ApplicationDbContext : IdentityDbContext<User>, IDataProtectionKeyContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -24,5 +24,8 @@ namespace MvcMusicStore.Models
         }
 
         public virtual DbSet<CacheTable> CacheTable { get; set; }
+
+        // This maps to the table that stores keys.
+        public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
     }
 }

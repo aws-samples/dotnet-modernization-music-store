@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace MvcMusicStoreCore.Migrations.DataProtectionKeys
+namespace MvcMusicStoreCore.Migrations
 {
-    public partial class AddDataProtectionKeys : Migration
+    public partial class dataProtectionKey : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
