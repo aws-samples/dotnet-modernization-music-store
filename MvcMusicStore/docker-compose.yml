@@ -8,12 +8,10 @@ services:
     environment:
       - ConnectionStrings__MusicStoreEntities=Server=db;Initial Catalog=MusicStore;User Id=sa;Password=P@ssword1
       - ConnectionStrings__IdentityConnection=Server=db;Initial Catalog=identity;User Id=sa;Password=P@ssword1
-      - ConnectionStrings__redisConnection=redis:6379
     ports:
       - "80"
     depends_on:
       - db
-      - redis
   db:
     image: mcr.microsoft.com/mssql/server
     environment:
@@ -21,12 +19,6 @@ services:
       ACCEPT_EULA: "Y"
     ports:
       - "1601:1433"
-  redis:
-    image: redis
-    expose:
-      - "6379"
-    ports:
-      - "6379:6379"
   nginx:
     image: nginx:latest
     volumes:

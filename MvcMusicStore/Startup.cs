@@ -14,6 +14,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace MvcMusicStoreCore
 {
@@ -36,20 +38,16 @@ namespace MvcMusicStoreCore
 
             services.AddHttpContextAccessor();
 
-            // distributed cache is used as a backing store for session.
-            if (!string.IsNullOrEmpty(Configuration.GetConnectionString("redisConnection")))
+            //// distributed cache is used as a backing store for session.
+            services.AddDistributedSqlServerCache(options =>
             {
-                // persist cache in redis.
-                services.AddDistributedRedisCache(options =>
-                {
-                    options.Configuration = Configuration.GetConnectionString("redisConnection");
-                });
-            }
-            else
-            {
-                // add in memory cache.
-                services.AddDistributedMemoryCache();
-            }
+                options.ConnectionString =
+                    Configuration.GetConnectionString("IdentityConnection");
+                options.SchemaName = "dbo";
+                options.TableName = "MusicStoreCache";
+            });
+
+            services.AddDistributedMemoryCache();
 
             services.AddSession();
             
@@ -57,6 +55,12 @@ namespace MvcMusicStoreCore
 
             services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(Configuration.GetConnectionString("IdentityConnection")));
+
+            services.AddIdentity<User, IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
+
+            services.ConfigureApplicationCookie(options => options.LoginPath = "/Account/Logon");
 
             // Add a DbContext to store your Database Keys
             services.AddDbContext<DataProtectionKeysContext>(options =>
@@ -67,32 +71,30 @@ namespace MvcMusicStoreCore
             services.AddDataProtection()
                 .PersistKeysToDbContext<DataProtectionKeysContext>();
 
-            services.AddIdentity<User, IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
-
-            services.ConfigureApplicationCookie(options => options.LoginPath = "/Account/Logon");
-
             services.AddScoped<IPasswordHasher<User>, SQLPasswordHasher<User>>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-
-            using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
+            try
             {
-                // EF Core
-                var context = serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                context.Database.Migrate();
+                using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
+                {
+                    // EF Core
+                    var context = serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                    context.Database.Migrate();
 
-                // Data protection keys
-                var dataProtectionKeysContext = serviceScope.ServiceProvider.GetRequiredService<DataProtectionKeysContext>();
-                dataProtectionKeysContext.Database.Migrate();
+                    //Data protection keys
+                    var dataProtectionKeysContext = serviceScope.ServiceProvider.GetRequiredService<DataProtectionKeysContext>();
+                    dataProtectionKeysContext.Database.Migrate();
 
-                // EF 6.4 (MusicStore)
-                System.Data.Entity.Database.SetInitializer(new MvcMusicStore.Models.SampleData());
+                    // EF 6.4 (MusicStore)
+                    System.Data.Entity.Database.SetInitializer(new MvcMusicStore.Models.SampleData());
+                }
             }
+            catch (Exception)
+            { }
 
             if (env.IsDevelopment())
             {
