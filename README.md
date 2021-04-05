@@ -16,7 +16,7 @@ This library is licensed under the Apache 2.0 License
 Once you have the prerequisites installed on your local development machine you should be able to run the Music Store locally in your IDE. The Music Store uses SQL Server for the backend by default and is seeded with data on startup. You will need to either provision or have access to a database. 
 
 ```PowerShell
-docker-compose up --scale coreweb=2 --build
+docker-compose -f MvcMusicStore/docker-compose.yml up --build --scale coreweb=2
 ```
 
 And browse to http://localhost:5000
