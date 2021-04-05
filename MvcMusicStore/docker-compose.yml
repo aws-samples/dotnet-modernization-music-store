@@ -9,7 +9,7 @@ services:
       - ConnectionStrings__MusicStoreEntities=Server=db;Initial Catalog=MusicStore;User Id=sa;Password=P@ssword1
       - ConnectionStrings__IdentityConnection=Server=db;Initial Catalog=identity;User Id=sa;Password=P@ssword1
     ports:
-      - 5001:80
+      - "80"
     depends_on:
       - db
   db:
@@ -19,3 +19,12 @@ services:
       ACCEPT_EULA: "Y"
     ports:
       - "1601:1433"
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./proxy.conf:/etc/nginx/proxy.conf:ro
+    depends_on:
+      - coreweb
+    ports:
+      - "5000:5000"
