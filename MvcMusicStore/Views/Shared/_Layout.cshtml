@@ -19,7 +19,6 @@
             <li><a href="@Url.Content("~")" id="current">Home</a></li>
             <li><a href="@Url.Content("~/Store/")">Store</a></li>
             <li>@{Html.RenderAction("CartSummary", "ShoppingCart");}</li>
-            <li><a href="@Url.Content("~/StoreManager/")">Admin</a></li>
             @{Html.RenderPartial("_loginPartial"); }
         </ul>
     </div>
