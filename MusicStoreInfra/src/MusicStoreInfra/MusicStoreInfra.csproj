@@ -2,17 +2,17 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
     <!-- CDK Construct Library dependencies -->
-    <PackageReference Include="Amazon.CDK" Version="1.61.1" />
-    <PackageReference Include="Amazon.CDK.AWS.ECR" Version="1.61.1" />
-    <PackageReference Include="Amazon.CDK.AWS.ECS" Version="1.61.1" />
-    <PackageReference Include="Amazon.CDK.AWS.ECS.Patterns" Version="1.61.1" />
-    <PackageReference Include="Amazon.CDK.AWS.RDS" Version="1.61.1" />
-    <PackageReference Include="Amazon.CDK.AWS.SecretsManager" Version="1.61.1" />
+    <PackageReference Include="Amazon.CDK" Version="1.100.0" />
+    <PackageReference Include="Amazon.CDK.AWS.ECR" Version="1.100.0" />
+    <PackageReference Include="Amazon.CDK.AWS.ECS" Version="1.100.0" />
+    <PackageReference Include="Amazon.CDK.AWS.ECS.Patterns" Version="1.100.0" />
+    <PackageReference Include="Amazon.CDK.AWS.RDS" Version="1.100.0" />
+    <PackageReference Include="Amazon.CDK.AWS.SecretsManager" Version="1.100.0" />
 
     <!-- jsii Roslyn analyzers (un-comment to obtain compile-time checks for missing required props
     <PackageReference Include="Amazon.Jsii.Analyzers" Version="*" PrivateAssets="all" />
