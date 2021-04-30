@@ -8,6 +8,9 @@
   <ItemGroup>
     <!-- CDK Construct Library dependencies -->
     <PackageReference Include="Amazon.CDK" Version="1.100.0" />
+    <PackageReference Include="Amazon.CDK.AWS.CodeCommit" Version="1.100.0" />
+    <PackageReference Include="Amazon.CDK.AWS.CodePipeline" Version="1.100.0" />
+    <PackageReference Include="Amazon.CDK.AWS.CodePipeline.Actions" Version="1.100.0" />
     <PackageReference Include="Amazon.CDK.AWS.ECR" Version="1.100.0" />
     <PackageReference Include="Amazon.CDK.AWS.ECS" Version="1.100.0" />
     <PackageReference Include="Amazon.CDK.AWS.ECS.Patterns" Version="1.100.0" />

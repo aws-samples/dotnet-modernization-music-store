@@ -1,4 +1,3 @@
-using System;
 using Amazon.CDK;
 using Amazon.CDK.AWS.ECR;
 using Amazon.CDK.AWS.SecretsManager;
@@ -13,22 +12,15 @@ namespace MusicStoreInfra
 {
     public class HostingInfraStack : Stack
     {
-        internal string ContextVar(string contextVar, string defaultVal)
-        {
-            object val = this.Node.TryGetContext(contextVar);
-            string strVal = val?.ToString();
-            return string.IsNullOrEmpty(strVal) ? defaultVal : strVal;
-        }
-
-        internal string DbUsername => ContextVar("DbUsername", "sa");
-        internal string EcrRepoName => this.ContextVar("EcrRepoName", "music-store");
-        internal string ImageTag => this.ContextVar("ContainerImageTag", "latest");
+        internal string EcsClusterName => this.CmdLineArg("EcsClusterName", "Music-Store");
+        internal string EcsServiceName => this.CmdLineArg("EcsServiceName", "music-store");
+        internal string DbUsername => CmdLineArg("DbUsername", "sa");
+        internal string EcrRepoName => this.CmdLineArg("EcrRepoName", "music-store");
+        internal string ImageTag => this.CmdLineArg("ContainerImageTag", "latest");
         internal int ReplicaCount => int.Parse(this.Node.TryGetContext("ReplicaCount")?.ToString() ?? "1");
 
         internal HostingInfraStack(Construct scope, string id = "Music-Store-Hosting-Infra", IStackProps props = null) : base(scope, id, props)
         {
-            Console.WriteLine($"DbUsername=\"{DbUsername}\"\nEcrRepoName=\"{EcrRepoName}\"\nImageTag={ImageTag}\nReplicaCount={ReplicaCount}");
-
             var dbPasswordSecret = new Amazon.CDK.AWS.SecretsManager.Secret(this, "DbPasswordSecret", new SecretProps
             {
                 SecretName = "music-store-database-password",
@@ -39,10 +31,7 @@ namespace MusicStoreInfra
                 }
             });
 
-            var vpc = new Vpc(this, "music-store-hosting-vpc", new VpcProps
-            {
-                MaxAzs = 3
-            });
+            var vpc = new Vpc(this, "music-store-hosting-vpc", new VpcProps { MaxAzs = 3 });
 
             var dbServer = new DatabaseInstance(this, "music-store-RDS-SQL-Server", new DatabaseInstanceProps
             {
@@ -55,11 +44,9 @@ namespace MusicStoreInfra
                 Credentials = Credentials.FromPassword(this.DbUsername, dbPasswordSecret.SecretValue)
             });
 
-            var ecsCluster = new Cluster(this, "music-store-ECS-cluster", new ClusterProps
-            {
-                Vpc = vpc,
-                ClusterName = "Music-Store"
-            });
+            var ecsCluster = new Cluster(this, "music-store-ECS-cluster", 
+                new ClusterProps { Vpc = vpc, ClusterName = this.EcsClusterName }
+            );
 
             string ecrRepoName = this.EcrRepoName;
             IRepository ecrRepo = Repository.FromRepositoryName(this, "music-store-existing-ECR-repo", ecrRepoName);
@@ -69,6 +56,7 @@ namespace MusicStoreInfra
                 {
                     Cluster = ecsCluster,
                     DesiredCount = this.ReplicaCount,
+                    ServiceName = this.EcsServiceName,
                     LoadBalancer = new ApplicationLoadBalancer(this, "music-store-ALB",
                         new Amazon.CDK.AWS.ElasticLoadBalancingV2.ApplicationLoadBalancerProps
                         {
@@ -92,6 +80,12 @@ namespace MusicStoreInfra
 
         private string FormatConnectionString(string serverAddress, string dbName, object dbPassword) =>
             $"Server={serverAddress}; Database={dbName}; User Id={this.DbUsername}; Password={dbPassword}";
+
+        internal string CmdLineArg(string contextVar, string defaultVal)
+        {
+            object val = this.Node.TryGetContext(contextVar);
+            string strVal = val?.ToString();
+            return string.IsNullOrEmpty(strVal) ? defaultVal : strVal;
+        }
     }
 }
-

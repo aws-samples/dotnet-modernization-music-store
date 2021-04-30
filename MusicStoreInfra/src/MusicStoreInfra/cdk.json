@@ -1,10 +1,13 @@
 {
   "app": "dotnet run -p MusicStoreInfra.csproj",
   "context": {
-    "DbUsername": "sa",
+    "EcsClusterName": "Music-Store",
+    "EcsServiceName": "music-store",
+    "ReplicaCount": 2,
     "EcrRepoName": "music-store",
     "ContainerImageTag": "latest",
-    "ReplicaCount": 2,
+    "DbUsername": "sa",
+    "GitBranchToBuild": "framework-to-core-completed",
 
     "@aws-cdk/core:enableStackNameDuplicates": "true",
     "aws-cdk:enableDiffNoFail": "true",
