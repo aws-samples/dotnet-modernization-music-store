@@ -26,7 +26,7 @@ namespace MusicStoreInfra
         public BuildInfraStack(Construct scope, string id = "Music-Store-CICD-Infra", IStackProps props = null) : base(scope, id, props)
         {
             new Ecr.Repository(this, "ECR-repo", new Ecr.RepositoryProps{ RepositoryName = this.EcrRepoName });
-            Repository gitRepo = ProvisionEcrGitRepo();
+            Repository gitRepo = this.ProvisionEcrGitRepo();
             this.CreateBuildPipeline(gitRepo);
         }
 
@@ -55,17 +55,14 @@ namespace MusicStoreInfra
                                         Branch = this.GitBranchToBuild,
                                     })
                     ),
-                    StageFromActions("Build-container-image", 
-                        this.CreateDockerImageBuildAction(sourceCodeArtifact)
-                    ),
-                    StageFromActions("Recycle-ECS-tasks", this.RestartEcsContainers(sourceCodeArtifact))
+                    StageFromActions("Build-container-image", this.ContainerImageBuildAction(sourceCodeArtifact)),
+                    StageFromActions("Recycle-ECS-tasks", this.RestartEcsContainersAction(sourceCodeArtifact))
                 }
             });
         }
 
-        private CodeBuildAction CreateDockerImageBuildAction(Artifact_ sourceCodeArtifact)
-        {
-            var codeBuildAction = new CodeBuildAction(new CodeBuildActionProps
+        private CodeBuildAction ContainerImageBuildAction(Artifact_ sourceCodeArtifact)
+            => new CodeBuildAction(new CodeBuildActionProps
             {
                 Input = sourceCodeArtifact,
                 ActionName = "Build-app-Docker-image",
@@ -121,23 +118,18 @@ namespace MusicStoreInfra
                             ["IMAGE_TAG"] = new BuildEnvironmentVariable { Value = this.ImageTag },
                         },
                     },
-                    Role = this.CreateCodeBuildRoleFromManagedPolicies("Music-store-code-build-role", "AmazonEC2ContainerRegistryPowerUser")
-,
+                    Role = this.CreateCodeBuildRoleFromManagedPolicies("Music-store-code-build-role", "AmazonEC2ContainerRegistryPowerUser"),
                     Cache = Cache.Local(LocalCacheMode.SOURCE, LocalCacheMode.DOCKER_LAYER)
                 })
             });
-
-            return codeBuildAction;
-        }
 
         /// <summary>
         /// Deployment stage recycles ECS containers w/o needing to update ECS Task Definition
         /// because it relies on mutable tag image, where container image to run has the same
         /// tag, like "latest" even when underlying image changes.
         /// </summary>
-        private CodeBuildAction RestartEcsContainers(Artifact_ sourceCodeArtifact)
-        {
-            var codeBuildAction = new CodeBuildAction(new CodeBuildActionProps
+        private CodeBuildAction RestartEcsContainersAction(Artifact_ sourceCodeArtifact)
+            => new CodeBuildAction(new CodeBuildActionProps
             {
                 Input = sourceCodeArtifact,
                 ActionName = "Restart-ECS-Containers-with-new-image",
@@ -170,9 +162,6 @@ namespace MusicStoreInfra
                     Role = this.CreateCodeBuildRoleFromManagedPolicies("Music-Store-ECS-container-recycle-role", "AmazonECS_FullAccess"),
                 })
             });
-
-            return codeBuildAction;
-        }
 
         public Role CreateCodeBuildRoleFromManagedPolicies(string roleName, params string[] managedPolicyNames)
             => new Role(this, roleName, new RoleProps
