@@ -25,12 +25,19 @@ namespace MusicStoreInfra
 
         public BuildInfraStack(Construct scope, string id = "Music-Store-CICD-Infra", IStackProps props = null) : base(scope, id, props)
         {
-            new Ecr.Repository(this, "ECR-repo", new Ecr.RepositoryProps{ RepositoryName = this.EcrRepoName });
-            Repository gitRepo = this.ProvisionEcrGitRepo();
+            _ = this.ProvisionEcrRepo();
+            Repository gitRepo = this.ProvisionGitRepo();
             this.CreateBuildPipeline(gitRepo);
         }
 
-        private Repository ProvisionEcrGitRepo()
+        private Ecr.Repository ProvisionEcrRepo()
+            => new Ecr.Repository(this, "ECR-repo", new Ecr.RepositoryProps
+            {
+                RepositoryName = this.EcrRepoName,
+                RemovalPolicy = RemovalPolicy.DESTROY
+            });
+
+        private Repository ProvisionGitRepo()
             => new Repository(this, "music-store-git-repo", new RepositoryProps
             {
                 RepositoryName = "music-store",
