@@ -389,7 +389,7 @@ Resources:
       UserData:
         Fn::Base64:
           Fn::Sub: "<powershell> \
-          \  (Get-Content C:/dotnet-modernization-music-store/MvcMusicStore/Web.config).replace('Data Source=.', '${DBServer.PrivateIp}') | Set-Content C:/dotnet-modernization-music-store/MvcMusicStore/Web.config \n\
+          \  (Get-Content C:/dotnet-modernization-music-store/MvcMusicStore/Web.config).replace('Data Source=.', 'Data Source=${DBServer.PrivateIp}') | Set-Content C:/dotnet-modernization-music-store/MvcMusicStore/Web.config \n\
           \ </powershell>"
       Tags:
       - Key: Name
