@@ -382,10 +382,15 @@ Resources:
         Ref: SourceEnvSubnet
       KeyName:
         Ref: KeyName
-      ImageId: ami-0f25314651ab9ec1c
+      ImageId: ami-03cce6d41ab7b49b1
       Monitoring: true
       IamInstanceProfile:
         Ref: EC2InstanceProfile
+      UserData:
+        Fn::Base64:
+          Fn::Sub: "<powershell> \
+          \  (Get-Content C:/dotnet-modernization-music-store/MvcMusicStore/Web.config).replace('Data Source=.', '${DBServer.PrivateIp}') | Set-Content C:/dotnet-modernization-music-store/MvcMusicStore/Web.config \n\
+          \ </powershell>"
       Tags:
       - Key: Name
         Value: Source-NET-Webserver
