@@ -7,6 +7,7 @@ using Amazon.CDK.AWS.ECS;
 using Amazon.CDK.AWS.ECS.Patterns;
 using Amazon.CDK.AWS.ElasticLoadBalancingV2;
 using System.Collections.Generic;
+using Amazon.CDK.AWS.KMS;
 
 namespace MusicStoreInfra
 {
@@ -33,11 +34,15 @@ namespace MusicStoreInfra
 
             var vpc = new Vpc(this, "music-store-hosting-vpc", new VpcProps { MaxAzs = 3 });
 
+            IKey databaseEncryptionKey = new Key(this, "database-encryption-key", new KeyProps { EnableKeyRotation = true });
+
             var dbServer = new DatabaseInstance(this, "music-store-RDS-SQL-Server", new DatabaseInstanceProps
             {
                 Vpc = vpc,
                 VpcSubnets = new SubnetSelection { SubnetType = SubnetType.PRIVATE },
-                DeletionProtection = false,
+                DeletionProtection = true,
+                StorageEncrypted = true,
+                StorageEncryptionKey = databaseEncryptionKey,
                 RemovalPolicy = RemovalPolicy.DESTROY,
                 InstanceIdentifier = "Music-Store-DB-Server",
                 Engine = DatabaseInstanceEngine.SqlServerWeb(new SqlServerWebInstanceEngineProps { Version = SqlServerEngineVersion.VER_15 }),
@@ -77,6 +82,8 @@ namespace MusicStoreInfra
 
             dbServer.Connections.AllowDefaultPortFrom(lbFargateSvc.Service.Connections.SecurityGroups[0]);
         }
+
+        private generate
 
         private string FormatConnectionString(string serverAddress, string dbName, object dbPassword) =>
             $"Server={serverAddress}; Database={dbName}; User Id={this.DbUsername}; Password={dbPassword}";

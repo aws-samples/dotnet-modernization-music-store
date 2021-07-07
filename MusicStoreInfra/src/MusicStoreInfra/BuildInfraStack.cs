@@ -9,6 +9,8 @@ using StageProps = Amazon.CDK.AWS.CodePipeline.StageProps;
 using Amazon.CDK.AWS.CodePipeline.Actions;
 using Amazon.CDK.AWS.IAM;
 using IStageProps = Amazon.CDK.AWS.CodePipeline.IStageProps;
+using Amazon.CDK.AWS.S3;
+using Amazon.CDK.AWS.KMS;
 
 // ReSharper disable UnusedMethodReturnValue.Local
 // ReSharper disable ObjectCreationAsStatement
@@ -48,9 +50,17 @@ namespace MusicStoreInfra
         {
             Artifact_ sourceCodeArtifact = new Artifact_("Music-Store-Source");
 
+            IKey artifactEncryptionKey = new Key(this, "artifact-bucket-encryption-key", new KeyProps { EnableKeyRotation = true});
+
+            IBucket artifactBucket = new Bucket(this, "ArtifactBucket", new BucketProps
+            {
+                EncryptionKey = artifactEncryptionKey,
+            });
+
             return new Pipeline(this, "music-store-build-pipeline", new PipelineProps
             {
                 PipelineName = "music-store",
+                ArtifactBucket = artifactBucket,
                 Stages = new IStageProps[]
                 {
                     StageFromActions("Checkout-Source-Code", 
@@ -131,7 +141,7 @@ namespace MusicStoreInfra
             });
 
         /// <summary>
-        /// Deployment stage recycles ECS containers w/o needing to update ECS Task Definition
+        /// Deployment stage recycles ECS containers w/o needing to update ECS Task Definitikmson
         /// because it relies on mutable tag image, where container image to run has the same
         /// tag, like "latest" even when underlying image changes.
         /// </summary>
