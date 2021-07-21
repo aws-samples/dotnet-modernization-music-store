@@ -1,0 +1,1115 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: App2Container Workshop Source Environment
+Parameters:
+  KeyName:
+    Description: Name of the EC2 KeyPair
+    Type: String
+    Default: linux_servers_ssh_key
+  SourceVPCName:
+    Description: The name of the Source VPC being created.
+    Type: String
+    Default: SourceVPC
+  TargetVPCName:
+    Description: The name of the Target VPC being created.
+    Type: String
+    Default: TargetVPC
+  YourIPAddress:
+    Description: The IP address range that can be used to SSH/ RDP to the EC2 instances
+    Type: String
+    Default: 0.0.0.0/0
+    Type: String
+    MinLength: '9'
+    MaxLength: '18'
+    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+Mappings:
+  SubnetConfig:
+    TargetVPC:
+      CIDR: 10.1.0.0/16
+    Public0:
+      CIDR: 10.1.0.0/24
+    Public1:
+      CIDR: 10.1.1.0/24
+    Private00:
+      CIDR: 10.1.100.0/24
+    Private10:
+      CIDR: 10.1.200.0/24
+    Private01:
+      CIDR: 10.1.101.0/24
+    Private11:
+      CIDR: 10.1.201.0/24
+  AZRegions:
+    us-east-1:
+      AZs:
+      - a
+      - b
+    us-west-2:
+      AZs:
+      - a
+      - b
+    us-east-2:
+      AZs:
+      - a
+      - b
+Resources:
+  SourceEnvVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames: 'true'
+      Tags:
+      - Key: Name
+        Value:
+          Ref: SourceVPCName
+  SourceEnvSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: SourceEnvVPC
+      AvailabilityZone:
+        Fn::Sub:
+        - ${AWS::Region}${AZ}
+        - AZ:
+            Fn::Select:
+            - 0
+            - Fn::FindInMap:
+              - AZRegions
+              - Ref: AWS::Region
+              - AZs
+      CidrBlock: 10.0.0.0/24
+      MapPublicIpOnLaunch: 'true'
+      Tags:
+      - Key: Network
+        Value: Public
+      - Key: Name
+        Value:
+          Fn::Join:
+          - ''
+          - - Ref: SourceVPCName
+            - -public-
+            - Fn::Select:
+              - 0
+              - Fn::FindInMap:
+                - AZRegions
+                - Ref: AWS::Region
+                - AZs
+  WebServerSG:
+    Type: AWS::EC2::SecurityGroup
+    DependsOn:
+    - SourceEnvSubnet
+    Properties:
+      GroupName: WebServerSG
+      GroupDescription: Web Server SG
+      VpcId:
+        Ref: SourceEnvVPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: '3389'
+        ToPort: '3389'
+        CidrIp: !Ref YourIPAddress
+      Tags:
+      - Key: Name
+        Value: WebServerSG
+  SecurityGroupWinRMIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId:
+        Ref: WebServerSG
+      IpProtocol: tcp
+      FromPort: '5986'
+      ToPort: '5986'
+      SourceSecurityGroupId:
+        Ref: WebServerSG
+  DBServerSG:
+    Type: AWS::EC2::SecurityGroup
+    DependsOn:
+    - SourceEnvSubnet
+    Properties:
+      GroupName: DBServerSG
+      GroupDescription: DB Server SG
+      VpcId:
+        Ref: SourceEnvVPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: '3389'
+        ToPort: '3389'
+        CidrIp: !Ref YourIPAddress
+      Tags:
+      - Key: Name
+        Value: DBServerSG
+  SQLRDSSG:
+    Type: AWS::EC2::SecurityGroup
+    DependsOn:
+    - TargetVPC
+    Properties:
+      GroupName: SQLRDSSG
+      GroupDescription: SG for RDS SQL Server
+      VpcId:
+        Ref: TargetVPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: '1433'
+        ToPort: '1433'
+        CidrIp: 10.0.0.0/16
+      Tags:
+      - Key: Name
+        Value: SQLRDSSG
+  SQLRDSSGIngress1:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn:
+    - SQLRDSSG
+    Properties:
+      IpProtocol: tcp
+      ToPort: 1433
+      FromPort: 1433
+      CidrIp: 10.1.0.0/16
+      GroupId:
+        Ref: SQLRDSSG
+  RISG:
+    Type: AWS::EC2::SecurityGroup
+    DependsOn:
+    - TargetVPC
+    Properties:
+      GroupName: RISG
+      GroupDescription: SG for DMS Replication instance
+      VpcId:
+        Ref: TargetVPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: '5432'
+        ToPort: '5432'
+        CidrIp: 10.0.0.0/16
+      Tags:
+      - Key: Name
+        Value: RI-SG
+  RISGIngress1:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn:
+    - RISG
+    Properties:
+      IpProtocol: tcp
+      ToPort: 5432
+      FromPort: 5432
+      CidrIp: 10.1.0.0/16
+      GroupId:
+        Ref: RISG
+  WebIngress3:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn:
+    - WebServerSG
+    Properties:
+      IpProtocol: tcp
+      ToPort: 80
+      FromPort: 80
+      CidrIp: !Ref YourIPAddress
+      GroupId:
+        Ref: WebServerSG
+  WebIngress4:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn:
+    - WebServerSG
+    Properties:
+      IpProtocol: tcp
+      ToPort: 8081
+      FromPort: 8081
+      CidrIp: !Ref YourIPAddress
+      GroupId:
+        Ref: WebServerSG
+  WebIngress5:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn:
+    - WebServerSG
+    Properties:
+      IpProtocol: tcp
+      ToPort: 8080
+      FromPort: 8080
+      CidrIp: !Ref YourIPAddress
+      GroupId:
+        Ref: WebServerSG
+  WebIngress6:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn:
+    - WebServerSG
+    Properties:
+      IpProtocol: tcp
+      ToPort: 22
+      FromPort: 22
+      CidrIp: !Ref YourIPAddress
+      GroupId:
+        Ref: WebServerSG
+  DBIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn:
+    - DBServerSG
+    Properties:
+      GroupId:
+        Ref: DBServerSG
+      IpProtocol: tcp
+      ToPort: 1433
+      FromPort: 1433
+      SourceSecurityGroupId:
+        Ref: WebServerSG
+  DBIngress2:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn:
+    - DBServerSG
+    Properties:
+      GroupId:
+        Ref: DBServerSG
+      IpProtocol: tcp
+      ToPort: 1433
+      FromPort: 1433
+      CidrIp: 10.0.0.0/16
+  DBIngress2:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn:
+    - DBServerSG
+    Properties:
+      GroupId:
+        Ref: DBServerSG
+      IpProtocol: tcp
+      ToPort: 1433
+      FromPort: 1433
+      CidrIp: 10.1.0.0/16
+  DBIngress4:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn:
+    - DBServerSG
+    Properties:
+      GroupId:
+        Ref: DBServerSG
+      IpProtocol: tcp
+      ToPort: 5432
+      FromPort: 5432
+      CidrIp: 10.0.0.0/16
+  DBIngress5:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn:
+    - DBServerSG
+    Properties:
+      GroupId:
+        Ref: DBServerSG
+      IpProtocol: tcp
+      ToPort: 5432
+      FromPort: 5432
+      CidrIp: 10.1.0.0/16
+  DBIngress6:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn:
+    - DBServerSG
+    Properties:
+      GroupId:
+        Ref: DBServerSG
+      IpProtocol: tcp
+      ToPort: 22
+      FromPort: 22
+      CidrIp: !Ref YourIPAddress
+  SourceGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Join:
+          - ''
+          - - Ref: SourceVPCName
+            - -IGW
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    DependsOn:
+    - SourceEnvVPC
+    Properties:
+      VpcId:
+        Ref: SourceEnvVPC
+      InternetGatewayId:
+        Ref: SourceGateway
+  SourceEnvRouteTable:
+    Type: AWS::EC2::RouteTable
+    DependsOn:
+    - SourceEnvVPC
+    - SourceEnvSubnet
+    Properties:
+      VpcId:
+        Ref: SourceEnvVPC
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Join:
+          - ''
+          - - Ref: SourceVPCName
+            - -public-route-table
+  SourceEnvRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    DependsOn:
+    - SourceEnvSubnet
+    - SourceEnvRouteTable
+    Properties:
+      SubnetId:
+        Ref: SourceEnvSubnet
+      RouteTableId:
+        Ref: SourceEnvRouteTable
+  SourceEnvAllRoute:
+    Type: AWS::EC2::Route
+    DependsOn:
+    - SourceEnvRouteTable
+    Properties:
+      RouteTableId:
+        Ref: SourceEnvRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: SourceGateway
+  SourceVPCToTargetVPCRoute:
+    Type: AWS::EC2::Route
+    DependsOn:
+    - SourceEnvRouteTable
+    Properties:
+      RouteTableId:
+        Ref: SourceEnvRouteTable
+      DestinationCidrBlock: 10.1.0.0/16
+      VpcPeeringConnectionId:
+        Ref: VPCPeeringConnection
+  WebServer:
+    Type: AWS::EC2::Instance
+    DependsOn:
+    - DBServer
+    - SSHKeyGeneratorExecution
+    Properties:
+      InstanceType: t3.large
+      SecurityGroupIds:
+      - Ref: WebServerSG
+      SubnetId:
+        Ref: SourceEnvSubnet
+      KeyName:
+        Ref: KeyName
+      ImageId: ami-03cce6d41ab7b49b1
+      Monitoring: true
+      IamInstanceProfile:
+        Ref: EC2InstanceProfile
+      UserData:
+        Fn::Base64:
+          Fn::Sub: "<powershell> \
+          \  (Get-Content C:/dotnet-modernization-music-store/MvcMusicStore/Web.config).replace('Data Source=.', 'Data Source=${DBServer.PrivateIp}') | Set-Content C:/dotnet-modernization-music-store/MvcMusicStore/Web.config \n\
+          \ </powershell>"
+      Tags:
+      - Key: Name
+        Value: Source-NET-Webserver
+      - Key: "env"
+        Value: "a2c_workshop"
+  SourceBastionHost:
+    Type: AWS::EC2::Instance
+    DependsOn:
+    - DBServer
+    - SSHKeyGeneratorExecution
+    Properties:
+      InstanceType: t3.large
+      SecurityGroupIds:
+      - Ref: WebServerSG
+      SubnetId:
+        Ref: SourceEnvSubnet
+      KeyName:
+        Ref: KeyName
+      ImageId: ami-08950a3bffe643317
+      Monitoring: true
+      IamInstanceProfile:
+        Ref: EC2InstanceProfile
+      Tags:
+      - Key: Name
+        Value: Worker-Machine
+      - Key: "env"
+        Value: "a2c_workshop"
+  DBServer:
+    Type: AWS::EC2::Instance
+    DependsOn:
+    - SSHKeyGeneratorExecution
+    Properties:
+      InstanceType: t3.xlarge
+      SecurityGroupIds:
+      - Ref: DBServerSG
+      SubnetId:
+        Ref: SourceEnvSubnet
+      KeyName:
+        Ref: KeyName
+      ImageId: ami-09767eea21aeb1523
+      Monitoring: true
+      IamInstanceProfile:
+        Ref: EC2InstanceProfile
+      Tags:
+      - Key: Name
+        Value: Source-NET-DBServer
+      - Key: "env"
+        Value: "a2c_workshop"
+  EC2InstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ec2.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
+      - arn:aws:iam::aws:policy/AmazonS3FullAccess
+  SSHKeyGenerator:
+    Type: AWS::Serverless::Function
+    Properties:
+      Timeout: 60
+      Runtime: python3.8
+      Handler: generate_ssh_key.lambda_handler
+      Role:
+        Fn::GetAtt:
+        - SSHKeyGeneratorRole
+        - Arn
+      CodeUri: s3://application-migration-with-aws-workshop/lambda/438e5a43749a18ff0f4c7a7d0363e695
+  SSHKeyGeneratorExecution:
+    Type: Custom::SSHKeyGenerator
+    DependsOn:
+    - SSHKeyGenerator
+    Properties:
+      ServiceToken:
+        Fn::GetAtt:
+        - SSHKeyGenerator
+        - Arn
+  SSHKeyGeneratorRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Policies:
+      - PolicyName: root
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            - ssm:*
+            - ec2:*
+            Resource: '*'
+  EC2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+      - Ref: EC2InstanceRole
+  ApiGw:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+  GetSSMParamFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Timeout: 60
+      Runtime: python3.8
+      Handler: index.lambda_handler
+      Role:
+        Fn::GetAtt:
+        - GetSSMParamFunctionRole
+        - Arn
+      CodeUri: s3://application-migration-with-aws-workshop/lambda/4eb5dfa8efc17763bc41edb070cb9cd2
+      Events:
+        SSMReturningApi:
+          Type: Api
+          Properties:
+            Path: /get_ssm_param
+            Method: GET
+            RestApiId:
+              Ref: ApiGw
+  GetSSMParamFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Policies:
+      - PolicyName: root
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            - 'ssm:'
+            - cloudwatch:*
+            - ssm:GetParameter
+            Resource: '*'
+  TargetVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames: 'true'
+      CidrBlock:
+        Fn::FindInMap:
+        - SubnetConfig
+        - TargetVPC
+        - CIDR
+      Tags:
+      - Key: Name
+        Value:
+          Ref: TargetVPCName
+  PublicSubnet0:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: TargetVPC
+      AvailabilityZone:
+        Fn::Sub:
+        - ${AWS::Region}${AZ}
+        - AZ:
+            Fn::Select:
+            - 0
+            - Fn::FindInMap:
+              - AZRegions
+              - Ref: AWS::Region
+              - AZs
+      CidrBlock:
+        Fn::FindInMap:
+        - SubnetConfig
+        - Public0
+        - CIDR
+      MapPublicIpOnLaunch: 'true'
+      Tags:
+      - Key: Network
+        Value: Public
+      - Key: Name
+        Value:
+          Fn::Join:
+          - ''
+          - - Ref: TargetVPCName
+            - -public-
+            - Fn::Select:
+              - 0
+              - Fn::FindInMap:
+                - AZRegions
+                - Ref: AWS::Region
+                - AZs
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: TargetVPC
+      AvailabilityZone:
+        Fn::Sub:
+        - ${AWS::Region}${AZ}
+        - AZ:
+            Fn::Select:
+            - 1
+            - Fn::FindInMap:
+              - AZRegions
+              - Ref: AWS::Region
+              - AZs
+      CidrBlock:
+        Fn::FindInMap:
+        - SubnetConfig
+        - Public1
+        - CIDR
+      MapPublicIpOnLaunch: 'true'
+      Tags:
+      - Key: Network
+        Value: Public
+      - Key: Name
+        Value:
+          Fn::Join:
+          - ''
+          - - Ref: TargetVPCName
+            - -public-
+            - Fn::Select:
+              - 1
+              - Fn::FindInMap:
+                - AZRegions
+                - Ref: AWS::Region
+                - AZs
+  PrivateSubnet00:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: TargetVPC
+      AvailabilityZone:
+        Fn::Sub:
+        - ${AWS::Region}${AZ}
+        - AZ:
+            Fn::Select:
+            - 0
+            - Fn::FindInMap:
+              - AZRegions
+              - Ref: AWS::Region
+              - AZs
+      CidrBlock:
+        Fn::FindInMap:
+        - SubnetConfig
+        - Private00
+        - CIDR
+      Tags:
+      - Key: Network
+        Value: Private
+      - Key: Name
+        Value:
+          Fn::Join:
+          - ''
+          - - Ref: TargetVPCName
+            - -private-
+            - Fn::Select:
+              - 0
+              - Fn::FindInMap:
+                - AZRegions
+                - Ref: AWS::Region
+                - AZs
+            - -web
+  PrivateSubnet01:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: TargetVPC
+      AvailabilityZone:
+        Fn::Sub:
+        - ${AWS::Region}${AZ}
+        - AZ:
+            Fn::Select:
+            - 0
+            - Fn::FindInMap:
+              - AZRegions
+              - Ref: AWS::Region
+              - AZs
+      CidrBlock:
+        Fn::FindInMap:
+        - SubnetConfig
+        - Private01
+        - CIDR
+      Tags:
+      - Key: Network
+        Value: Private
+      - Key: Name
+        Value:
+          Fn::Join:
+          - ''
+          - - Ref: TargetVPCName
+            - -private-
+            - Fn::Select:
+              - 0
+              - Fn::FindInMap:
+                - AZRegions
+                - Ref: AWS::Region
+                - AZs
+            - -db
+  PrivateSubnet10:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: TargetVPC
+      AvailabilityZone:
+        Fn::Sub:
+        - ${AWS::Region}${AZ}
+        - AZ:
+            Fn::Select:
+            - 1
+            - Fn::FindInMap:
+              - AZRegions
+              - Ref: AWS::Region
+              - AZs
+      CidrBlock:
+        Fn::FindInMap:
+        - SubnetConfig
+        - Private10
+        - CIDR
+      Tags:
+      - Key: Network
+        Value: Private
+      - Key: Name
+        Value:
+          Fn::Join:
+          - ''
+          - - Ref: TargetVPCName
+            - -private-
+            - Fn::Select:
+              - 1
+              - Fn::FindInMap:
+                - AZRegions
+                - Ref: AWS::Region
+                - AZs
+            - -web
+  PrivateSubnet11:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: TargetVPC
+      AvailabilityZone:
+        Fn::Sub:
+        - ${AWS::Region}${AZ}
+        - AZ:
+            Fn::Select:
+            - 1
+            - Fn::FindInMap:
+              - AZRegions
+              - Ref: AWS::Region
+              - AZs
+      CidrBlock:
+        Fn::FindInMap:
+        - SubnetConfig
+        - Private11
+        - CIDR
+      Tags:
+      - Key: Network
+        Value: Private
+      - Key: Name
+        Value:
+          Fn::Join:
+          - ''
+          - - Ref: TargetVPCName
+            - -private-
+            - Fn::Select:
+              - 1
+              - Fn::FindInMap:
+                - AZRegions
+                - Ref: AWS::Region
+                - AZs
+            - -db
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Join:
+          - ''
+          - - Ref: TargetVPCName
+            - -IGW
+  GatewayToInternet:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId:
+        Ref: TargetVPC
+      InternetGatewayId:
+        Ref: InternetGateway
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: TargetVPC
+      Tags:
+      - Key: Network
+        Value: Public
+      - Key: Name
+        Value:
+          Fn::Join:
+          - ''
+          - - Ref: TargetVPCName
+            - -public-route-table
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: GatewayToInternet
+    Properties:
+      RouteTableId:
+        Ref: PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: InternetGateway
+  PublicSubnetsToSourceVPC:
+      Type: AWS::EC2::Route
+      Properties:
+        RouteTableId:
+          Ref: PublicRouteTable
+        DestinationCidrBlock: 10.0.0.0/16
+        VpcPeeringConnectionId:
+          Ref: VPCPeeringConnection
+  PublicSubnetRouteTableAssociation0:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: PublicSubnet0
+      RouteTableId:
+        Ref: PublicRouteTable
+  PublicSubnetRouteTableAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: PublicSubnet1
+      RouteTableId:
+        Ref: PublicRouteTable
+  PublicNetworkAcl:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      VpcId:
+        Ref: TargetVPC
+      Tags:
+      - Key: Network
+        Value: Public
+      - Key: Name
+        Value:
+          Fn::Join:
+          - ''
+          - - Ref: TargetVPCName
+            - -public-nacl
+  InboundHTTPPublicNetworkAclEntry:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId:
+        Ref: PublicNetworkAcl
+      RuleNumber: '100'
+      Protocol: '-1'
+      RuleAction: allow
+      Egress: 'false'
+      CidrBlock: 0.0.0.0/0
+      PortRange:
+        From: '0'
+        To: '65535'
+  OutboundPublicNetworkAclEntry:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId:
+        Ref: PublicNetworkAcl
+      RuleNumber: '100'
+      Protocol: '-1'
+      RuleAction: allow
+      Egress: 'true'
+      CidrBlock: 0.0.0.0/0
+      PortRange:
+        From: '0'
+        To: '65535'
+  PublicSubnetNetworkAclAssociation0:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId:
+        Ref: PublicSubnet0
+      NetworkAclId:
+        Ref: PublicNetworkAcl
+  PublicSubnetNetworkAclAssociation1:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId:
+        Ref: PublicSubnet1
+      NetworkAclId:
+        Ref: PublicNetworkAcl
+  ElasticIP0:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Join:
+          - ''
+          - - Ref: TargetVPCName
+            - -nat-gateway-eip-0
+  ElasticIP1:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Join:
+          - ''
+          - - Ref: TargetVPCName
+            - -nat-gateway-eip-1
+  NATGateway0:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+        - ElasticIP0
+        - AllocationId
+      SubnetId:
+        Ref: PublicSubnet0
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Join:
+          - ''
+          - - Ref: TargetVPCName
+            - -nat-gateway-0
+  NATGateway1:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+        - ElasticIP1
+        - AllocationId
+      SubnetId:
+        Ref: PublicSubnet1
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Join:
+          - ''
+          - - Ref: TargetVPCName
+            - -nat-gateway-1
+  PrivateRouteTable0:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: TargetVPC
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Join:
+          - ''
+          - - Ref: TargetVPCName
+            - -private-route-table-0
+  PrivateRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: TargetVPC
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Join:
+          - ''
+          - - Ref: TargetVPCName
+            - -private-route-table-1
+  PrivateRouteToInternet0:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: PrivateRouteTable0
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: NATGateway0
+  PrivateRouteToInternet1:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: PrivateRouteTable1
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: NATGateway1
+  PrivateRouteToSourceVPC0:
+      Type: AWS::EC2::Route
+      Properties:
+        RouteTableId:
+          Ref: PrivateRouteTable0
+        DestinationCidrBlock: 10.0.0.0/16
+        VpcPeeringConnectionId:
+          Ref: VPCPeeringConnection
+  PrivateRouteToSourceVPC1:
+      Type: AWS::EC2::Route
+      Properties:
+        RouteTableId:
+          Ref: PrivateRouteTable1
+        DestinationCidrBlock: 10.0.0.0/16
+        VpcPeeringConnectionId:
+          Ref: VPCPeeringConnection
+  PrivateSubnetRouteTableAssociation00:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: PrivateSubnet00
+      RouteTableId:
+        Ref: PrivateRouteTable0
+  PrivateSubnetRouteTableAssociation01:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: PrivateSubnet01
+      RouteTableId:
+        Ref: PrivateRouteTable0
+  PrivateSubnetRouteTableAssociation10:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: PrivateSubnet10
+      RouteTableId:
+        Ref: PrivateRouteTable1
+  PrivateSubnetRouteTableAssociation11:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: PrivateSubnet11
+      RouteTableId:
+        Ref: PrivateRouteTable1
+  ecsTaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      RoleName: ecsTaskExecutionRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ecs-tasks.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      Policies:
+      - PolicyName: taskPolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action: ssm:DescribeParameters
+            Resource: '*'
+          - Effect: Allow
+            Action: ssm:GetParameters
+            Resource: '*'
+          - Effect: Allow
+            Action: kms:Decrypt
+            Resource: '*'
+          - Effect: Allow
+            Action: elasticfilesystem:*
+            Resource: '*'
+  VPCPeeringConnection:
+    Type: 'AWS::EC2::VPCPeeringConnection'
+    Properties:
+      VpcId: !Ref SourceEnvVPC
+      PeerVpcId: !Ref TargetVPC
+  TargetRDSSQLSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: BastionSG
+      GroupDescription: SG for Bastion host
+      VpcId:
+        Ref: TargetVPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: '1433'
+        ToPort: '1433'
+        CidrIp: 10.1.0.0/0
+      - IpProtocol: tcp
+        FromPort: '1433'
+        ToPort: '1433'
+        CidrIp: 10.0.0.0/0
+      Tags:
+      - Key: Name
+        Value: RDSSQLSecurityGroup
+Outputs:
+  NETWebAppURL:
+    Description: The .NET Web Application URL
+    Value:
+      !Sub http://${WebServer.PublicDnsName}:8081/
+  NETDBServerDNSName:
+    Description: The .NET DB Server DNS Name
+    Value:
+      Fn::GetAtt:
+      - DBServer
+      - PublicDnsName
+  SSHKeyURL:
+    Description: URL to get the SSH Key
+    Value:
+      Fn::Sub: https://${ApiGw}.execute-api.${AWS::Region}.amazonaws.com/prod/get_ssm_param
