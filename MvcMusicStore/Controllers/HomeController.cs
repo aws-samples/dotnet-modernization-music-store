@@ -1,4 +1,4 @@
-﻿using MvcMusicStore.Common.Models;
+using MvcMusicStore.Common.Models;
 using MvcMusicStore.Database;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,14 +10,11 @@ namespace MvcMusicStore.Controllers
     {
         //
         // GET: /Home/
-
         AlbumRepository albumRepository = new AlbumRepository();
-
         public ActionResult Index()
         {
             // Get most popular albums
             var albums = GetTopSellingAlbums(5);
-
             return View(albums);
         }
 
@@ -25,7 +22,6 @@ namespace MvcMusicStore.Controllers
         {
             // Group the order details by album and return
             // the albums with the highest count
-
             return albumRepository.GetTopSellingAlbums(count);
         }
     }
