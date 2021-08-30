@@ -7,12 +7,12 @@ namespace MvcMusicStore.Controllers
 {
     public class StoreController : Controller
     {
-        AlbumRepository albumRepository = new AlbumRepository();
+        MusicStoreEntities storeDB = new MusicStoreEntities();
         //
         // GET: /Store/
         public ActionResult Index()
         {
-            var genres = albumRepository.GetAllGenres();
+            var genres = storeDB.Genres.ToList();
             return View(genres);
         }
 
@@ -20,7 +20,9 @@ namespace MvcMusicStore.Controllers
         // GET: /Store/Browse?genre=Disco
         public ActionResult Browse(string genre)
         {
-            var genreModel = albumRepository.GetGenreWithAlbum(genre);
+            var genreModel = storeDB.Genres.Include("Albums")
+                .Single(g => g.Name == genre);
+
             return View(genreModel);
         }
 
@@ -28,7 +30,7 @@ namespace MvcMusicStore.Controllers
         // GET: /Store/Details/5
         public ActionResult Details(int id)
         {
-            var album = albumRepository.GetAlbumById(id);
+            var album = storeDB.Albums.Find(id);
             return View(album);
         }
 
@@ -37,7 +39,7 @@ namespace MvcMusicStore.Controllers
         [ChildActionOnly]
         public ActionResult GenreMenu()
         {
-            var genres = albumRepository.GetAllGenres();
+            var genres = storeDB.Genres.ToList();
             return PartialView(genres);
         }
     }

@@ -10,7 +10,8 @@ namespace MvcMusicStore.Controllers
     {
         //
         // GET: /Home/
-        AlbumRepository albumRepository = new AlbumRepository();
+        MusicStoreEntities storeDB = new MusicStoreEntities();
+
         public ActionResult Index()
         {
             // Get most popular albums
@@ -22,7 +23,9 @@ namespace MvcMusicStore.Controllers
         {
             // Group the order details by album and return
             // the albums with the highest count
-            return albumRepository.GetTopSellingAlbums(count);
+            return storeDB.Albums
+                .Take(count)
+                .ToList();
         }
     }
 }

@@ -41,7 +41,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AlbumRepository.cs" />
     <Compile Include="MusicStoreEntities.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SampleData.cs" />
