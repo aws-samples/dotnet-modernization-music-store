@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace MvcMusicStore.Models
+namespace MvcMusicStore.Common.Models
 {
     public partial class Genre
     {

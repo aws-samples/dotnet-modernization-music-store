@@ -5,6 +5,10 @@ VisualStudioVersion = 16.0.30204.135
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MvcMusicStore", "MvcMusicStore\MvcMusicStore.csproj", "{32DCD27D-A84C-4250-B657-408B3620A9AC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MvcMusicStore.Database", "Database\MvcMusicStore.Database.csproj", "{6412EB63-B9D4-4008-90F5-0B40C72880E9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MvcMusicStore.Common", "Common\MvcMusicStore.Common.csproj", "{60A0AAF7-B08A-4D45-B963-12CAB4CED19F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{32DCD27D-A84C-4250-B657-408B3620A9AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{32DCD27D-A84C-4250-B657-408B3620A9AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{32DCD27D-A84C-4250-B657-408B3620A9AC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6412EB63-B9D4-4008-90F5-0B40C72880E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6412EB63-B9D4-4008-90F5-0B40C72880E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6412EB63-B9D4-4008-90F5-0B40C72880E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6412EB63-B9D4-4008-90F5-0B40C72880E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60A0AAF7-B08A-4D45-B963-12CAB4CED19F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60A0AAF7-B08A-4D45-B963-12CAB4CED19F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60A0AAF7-B08A-4D45-B963-12CAB4CED19F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60A0AAF7-B08A-4D45-B963-12CAB4CED19F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

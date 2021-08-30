@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using MvcMusicStore.Common.Models;
 
-namespace MvcMusicStore.Models
+namespace MvcMusicStore.Database
 {
     public class SampleData : DropCreateDatabaseIfModelChanges<MusicStoreEntities>
     {

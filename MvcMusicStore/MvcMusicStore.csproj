@@ -106,11 +106,6 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Models\Album.cs" />
-    <Compile Include="Models\Artist.cs" />
-    <Compile Include="Models\Genre.cs" />
-    <Compile Include="Models\MusicStoreEntities.cs" />
-    <Compile Include="Models\SampleData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -217,6 +212,16 @@
     <None Include="packages.config" />
     <Content Include="Scripts\jquery-3.5.1.slim.min.map" />
     <Content Include="Scripts\jquery-3.5.1.min.map" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Common\MvcMusicStore.Common.csproj">
+      <Project>{60a0aaf7-b08a-4d45-b963-12cab4ced19f}</Project>
+      <Name>MvcMusicStore.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Database\MvcMusicStore.Database.csproj">
+      <Project>{6412eb63-b9d4-4008-90f5-0b40c72880e9}</Project>
+      <Name>MvcMusicStore.Database</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

@@ -1,4 +1,5 @@
-﻿using System.Web.Mvc;
+﻿using MvcMusicStore.Database;
+using System.Web.Mvc;
 using System.Web.Routing;
 
 namespace MvcMusicStore
@@ -27,7 +28,7 @@ namespace MvcMusicStore
 
         protected void Application_Start()
         {
-            System.Data.Entity.Database.SetInitializer(new MvcMusicStore.Models.SampleData());
+            System.Data.Entity.Database.SetInitializer(new SampleData());
 
             AreaRegistration.RegisterAllAreas();
 

@@ -1,4 +1,4 @@
-﻿namespace MvcMusicStore.Models
+﻿namespace MvcMusicStore.Common.Models
 {
     public class Artist
     {
