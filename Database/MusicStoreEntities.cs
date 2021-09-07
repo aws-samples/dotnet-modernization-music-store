@@ -5,6 +5,12 @@ namespace MvcMusicStore.Database
 {
     public class MusicStoreEntities : DbContext
     {
+
+        public MusicStoreEntities() : base("name=MusicStoreEntities")
+        { 
+        
+        }
+
         public DbSet<Album> Albums
         {
             get;
