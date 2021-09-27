@@ -2,7 +2,7 @@
 
 namespace MvcMusicStore.Models
 {
-    [DynamoDBTable("Albums")]
+    [DynamoDBTable("Artists")]
     public class Artist
     {
         [DynamoDBHashKey("PK")]

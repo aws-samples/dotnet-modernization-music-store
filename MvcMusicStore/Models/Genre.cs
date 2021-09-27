@@ -3,13 +3,13 @@ using System.Collections.Generic;
 
 namespace MvcMusicStore.Models
 {
-    [DynamoDBTable("Genre")]
+    [DynamoDBTable("Genres")]
     public partial class Genre
     {
         [DynamoDBHashKey("PK")]
         public int GenreId { get; set; }
         
-        [DynamoDBProperty("Artist")]
+        [DynamoDBProperty("Genre")]
         public string Name { get; set; }
         
         public string Description { get; set; }
