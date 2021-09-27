@@ -12,14 +12,24 @@ namespace MvcMusicStore.Models
     public class Album
     {
         [ScaffoldColumn(false)]
-        [DynamoDBHashKey("PK")]
+        [DynamoDBProperty]
+        // DynamoDB stream will manage the AlbumId and maintain backward compatibility in RDS database.
         public int AlbumId { get; set; }
 
+        [DynamoDBHashKey("PK")]
+        public string UniqueId { get; set; }
+        
         [DisplayName("Genre")]
+        [DynamoDBIgnore]
+        public int GenreGUID { get; set; }
+
+        [DisplayName("Artist")]
+        [DynamoDBIgnore]
+        public int ArtistGUID { get; set; }
+
         [DynamoDBIgnore]
         public int GenreId { get; set; }
 
-        [DisplayName("Artist")]
         [DynamoDBIgnore]
         public int ArtistId { get; set; }
 

@@ -6,7 +6,11 @@ namespace MvcMusicStore.Models
     public class Artist
     {
         [DynamoDBHashKey("PK")]
+        public string ArtistGUID { get; set; }
+
+        [DynamoDBIgnore]
         public int ArtistId { get; set; }
+        
         [DynamoDBProperty("Artist")]
         public string Name { get; set; }
     }

@@ -6,9 +6,12 @@ namespace MvcMusicStore.Models
     [DynamoDBTable("Genres")]
     public partial class Genre
     {
-        [DynamoDBHashKey("PK")]
+        [DynamoDBIgnore]
         public int GenreId { get; set; }
-        
+
+        [DynamoDBHashKey("PK")]
+        public string GenreGUID { get; set; }
+
         [DynamoDBProperty("Genre")]
         public string Name { get; set; }
         

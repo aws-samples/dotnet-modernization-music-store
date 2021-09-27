@@ -15,19 +15,19 @@
         <legend>Album</legend>
 
         <div class="editor-label">
-            @Html.LabelFor(model => model.GenreId, "Genre")
+            @Html.LabelFor(model => model.GenereUId, "Genre")
         </div>
         <div class="editor-field">
-            @Html.DropDownList("GenreId", String.Empty)
-            @Html.ValidationMessageFor(model => model.GenreId)
+            @Html.DropDownList("GenereUId", String.Empty)
+            @Html.ValidationMessageFor(model => model.GenereUId)
         </div>
 
         <div class="editor-label">
-            @Html.LabelFor(model => model.ArtistId, "Artist")
+            @Html.LabelFor(model => model.ArtistUId, "Artist")
         </div>
         <div class="editor-field">
-            @Html.DropDownList("ArtistId", String.Empty)
-            @Html.ValidationMessageFor(model => model.ArtistId)
+            @Html.DropDownList("ArtistUId", String.Empty)
+            @Html.ValidationMessageFor(model => model.ArtistUId)
         </div>
 
         <div class="editor-label">

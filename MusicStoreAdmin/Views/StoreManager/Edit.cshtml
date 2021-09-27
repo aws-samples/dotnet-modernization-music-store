@@ -17,19 +17,19 @@
         @Html.HiddenFor(model => model.AlbumId)
 
         <div class="editor-label">
-            @Html.LabelFor(model => model.Genre.GenreGUID, "GenreGUID")
+            @Html.LabelFor(model => model.GenreId, "Genre")
         </div>
         <div class="editor-field">
-            @Html.DropDownList("GenreGUID", String.Empty)
-            @Html.ValidationMessageFor(model => model.Genre.GenreGUID)
+            @Html.DropDownList("GenreId", String.Empty)
+            @Html.ValidationMessageFor(model => model.GenreId)
         </div>
 
         <div class="editor-label">
-            @Html.LabelFor(model => model.Artist.ArtistGUID, "ArtistGUID")
+            @Html.LabelFor(model => model.ArtistId, "Artist")
         </div>
         <div class="editor-field">
-            @Html.DropDownList("ArtistGUID", String.Empty)
-            @Html.ValidationMessageFor(model => model.Artist.ArtistGUID)
+            @Html.DropDownList("ArtistId", String.Empty)
+            @Html.ValidationMessageFor(model => model.ArtistId)
         </div>
 
         <div class="editor-label">
