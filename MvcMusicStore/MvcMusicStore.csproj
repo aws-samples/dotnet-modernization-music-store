@@ -123,6 +123,7 @@
     <Compile Include="Models\Album.cs" />
     <Compile Include="Models\Artist.cs" />
     <Compile Include="Models\Cart.cs" />
+    <Compile Include="Models\DynamoDb\AlbumFlat.cs" />
     <Compile Include="Models\DynamoDb\ArtistTypeConverter.cs" />
     <Compile Include="Models\DynamoDb\GenreTypeConverter.cs" />
     <Compile Include="Models\Genre.cs" />

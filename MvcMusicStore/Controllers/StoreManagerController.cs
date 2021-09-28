@@ -1,6 +1,8 @@
 ﻿using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
+using Amazon.DynamoDBv2.DocumentModel;
 using MvcMusicStore.Models;
+using MvcMusicStore.Models.DynamoDb;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -27,23 +29,25 @@ namespace MvcMusicStore.Controllers
         //
         // GET: /StoreManager/
 
-        public async Task<ViewResult> Index()
+        public ViewResult Index()
         {
             //Get all items from dynamo DB.
-            var conditions = new List<ScanCondition>();
+            //var conditions = new List<ScanCondition>();
 
-            var albums = await context.ScanAsync<Album>(conditions).GetRemainingAsync();
+            IEnumerable<AlbumFlat> albums = context.Query<AlbumFlat>("ALBUM", QueryOperator.BeginsWith, new[] { "ALBUM" },
+                new DynamoDBOperationConfig { IndexName = "GS2PK-GS2SK-index" });
+
             return View(albums.ToList());
         }
 
         //
         // GET: /StoreManager/Details/5
 
-        public async Task<ViewResult> Details(string id)
+        public ViewResult Details(string id)
         {
-            var album = await context.LoadAsync<Album>(id).ConfigureAwait(false);
+            var album = context.Query<AlbumFlat>(id, QueryOperator.Equal, new[] { id });
 
-            return View(album);
+            return View(album.FirstOrDefault());
         }
 
         //
@@ -53,10 +57,8 @@ namespace MvcMusicStore.Controllers
         {
 
             //Get all genres and artists items.
-            var conditions = new List<ScanCondition>();
-
-            var genres = await context.ScanAsync<Genre>(conditions).GetRemainingAsync();
-            var artists = await context.ScanAsync<Artist>(conditions).GetRemainingAsync();
+            var genres = context.Query<Genre>("GENRE", QueryOperator.BeginsWith, new[] { "GENRE" });
+            var artists = context.Query<Artist>("ARTIST", QueryOperator.BeginsWith, new[] { "ARTIST" });
 
             ViewBag.GenreGUID = new SelectList(genres, "GenreGUID", "Name");
             ViewBag.ArtistGUID = new SelectList(artists, "ArtistGUID", "Name");
@@ -67,20 +69,19 @@ namespace MvcMusicStore.Controllers
         // POST: /StoreManager/Create
 
         [HttpPost]
-        public async Task<ActionResult> Create(Album album)
+        public ActionResult Create(AlbumFlat album)
         {
 
             //Get all genres and artists items.
-            var conditions = new List<ScanCondition>();
-            var genres = await context.ScanAsync<Genre>(conditions).GetRemainingAsync();
-            var artists = await context.ScanAsync<Artist>(conditions).GetRemainingAsync();
+            var genres = context.Query<Genre>("GENRE", QueryOperator.BeginsWith, new[] { "GENRE" });
+            var artists = context.Query<Artist>("ARTIST", QueryOperator.BeginsWith, new[] { "ARTIST" });
 
 
             if (ModelState.IsValid)
             {
                 album.UniqueId = "A#" + Guid.NewGuid().ToString();
-                album.Genre = genres.Find(g => g.GenreGUID == album.GenreGUID);
-                album.Artist = artists.Find(ar => ar.ArtistGUID == album.ArtistGUID);
+                album.Genre = genres.FirstOrDefault(g => g.GenreGUID == album.GenreGUID);
+                album.Artist = artists.FirstOrDefault(ar => ar.ArtistGUID == album.ArtistGUID);
 
                 context.Save(album);
                 return RedirectToAction("Index");
@@ -94,15 +95,15 @@ namespace MvcMusicStore.Controllers
         //
         // GET: /StoreManager/Edit/5
 
-        public async Task<ActionResult> Edit(string id)
+        public ActionResult Edit(string id)
         {
             //Album album = db.Albums.Find(id);
 
-            Album album = await context.LoadAsync<Album>(id).ConfigureAwait(false);
+            var album = context.Query<AlbumFlat>(id, QueryOperator.Equal, new[] { id }).FirstOrDefault();
 
-            var conditions = new List<ScanCondition>();
-            var genres = await context.ScanAsync<Genre>(conditions).GetRemainingAsync();
-            var artists = await context.ScanAsync<Artist>(conditions).GetRemainingAsync();
+            //Get all genres and artists items.
+            var genres = context.Query<Genre>("GENRE", QueryOperator.BeginsWith, new[] { "GENRE" });
+            var artists = context.Query<Artist>("ARTIST", QueryOperator.BeginsWith, new[] { "ARTIST" });
 
             ViewBag.GenreGUID = new SelectList(genres, "GenreGUID", "Name", album.GenreGUID);
             ViewBag.ArtistGUID = new SelectList(artists, "ArtistGUID", "Name", album.ArtistGUID);
@@ -113,17 +114,17 @@ namespace MvcMusicStore.Controllers
         // POST: /StoreManager/Edit/5
 
         [HttpPost]
-        public async Task<ActionResult> Edit(Album album)
+        public async Task<ActionResult> Edit(AlbumFlat album)
         {
 
-            var conditions = new List<ScanCondition>();
-            var genres = await context.ScanAsync<Genre>(conditions).GetRemainingAsync();
-            var artists = await context.ScanAsync<Artist>(conditions).GetRemainingAsync();
+            //Get all genres and artists items.
+            var genres = context.Query<Genre>("GENRE", QueryOperator.BeginsWith, new[] { "GENRE" });
+            var artists = context.Query<Artist>("ARTIST", QueryOperator.BeginsWith, new[] { "ARTIST" });
 
             if (ModelState.IsValid)
             {
-                album.Genre = genres.Find(g => g.GenreGUID == album.GenreGUID);
-                album.Artist = artists.Find(ar => ar.ArtistGUID == album.ArtistGUID);
+                album.Genre = genres.FirstOrDefault(g => g.GenreGUID == album.GenreGUID);
+                album.Artist = artists.FirstOrDefault(ar => ar.ArtistGUID == album.ArtistGUID);
 
                 await context.SaveAsync(album);
 
@@ -141,7 +142,7 @@ namespace MvcMusicStore.Controllers
         public async Task<ActionResult> Delete(string id)
         {
             //Album album = db.Albums.Find(id);
-            Album album = await context.LoadAsync<Album>(id).ConfigureAwait(false);
+            var album = context.Query<AlbumFlat>(id, QueryOperator.Equal, new[] { id }).FirstOrDefault();
 
             return View(album);
         }
@@ -156,7 +157,7 @@ namespace MvcMusicStore.Controllers
             //db.Albums.Remove(album);
             //db.SaveChanges();
 
-            context.Delete<Album>(id);
+            context.Delete<AlbumFlat>(id,id);
 
             return RedirectToAction("Index");
         }

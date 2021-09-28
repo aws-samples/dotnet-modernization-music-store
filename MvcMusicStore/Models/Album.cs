@@ -8,68 +8,12 @@ using System.Web.Mvc;
 namespace MvcMusicStore.Models
 {
     [Bind(Exclude = "AlbumId")]
-    [DynamoDBTable("Albums")]
     public class Album
     {
-        private string _genreGUID;
-        private string _artistGUID;
-
         [ScaffoldColumn(false)]
-        [DynamoDBProperty]
+        [DynamoDBIgnore]
         // DynamoDB stream will manage the AlbumId and maintain backward compatibility in RDS database.
         public int AlbumId { get; set; }
-
-        [DynamoDBHashKey("PK")]
-        public string UniqueId { get; set; }
-        
-        [DisplayName("GenreGUID")]
-        [DynamoDBIgnore]
-        public string GenreGUID
-        {
-            get
-            {
-
-                if (!string.IsNullOrEmpty(_genreGUID))
-                {
-                    return _genreGUID;
-                }
-
-                if (Genre != null)
-                {
-                    return Genre.GenreGUID;
-                }
-
-                return null;
-            }
-            set
-            {
-                _genreGUID = value;
-            }
-        }
-
-        [DisplayName("ArtistGUID")]
-        [DynamoDBIgnore]
-        public string ArtistGUID {
-            get
-            {
-
-                if (!string.IsNullOrEmpty(_artistGUID))
-                {
-                    return _artistGUID;
-                }
-
-                if (Artist != null)
-                {
-                    return Artist.ArtistGUID;
-                }
-
-                return null;
-            }
-            set
-            {
-                _artistGUID = value;
-            }
-        }
 
         [DynamoDBIgnore]
         public int GenreId { get; set; }

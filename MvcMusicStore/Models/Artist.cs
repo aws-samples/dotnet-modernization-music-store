@@ -2,10 +2,13 @@
 
 namespace MvcMusicStore.Models
 {
-    [DynamoDBTable("Artists")]
+    [DynamoDBTable("AlbumFlat")]
     public class Artist
     {
         [DynamoDBHashKey("PK")]
+        public string Type { get; set; }
+
+        [DynamoDBRangeKey("SK")]
         public string ArtistGUID { get; set; }
 
         [DynamoDBIgnore]
