@@ -33,7 +33,6 @@ namespace MvcMusicStore.Controllers
             var conditions = new List<ScanCondition>();
 
             var albums = await context.ScanAsync<Album>(conditions).GetRemainingAsync();
-            //var albums = db.Albums.Include(a => a.Genre).Include(a => a.Artist);
             return View(albums.ToList());
         }
 
@@ -42,9 +41,6 @@ namespace MvcMusicStore.Controllers
 
         public async Task<ViewResult> Details(string id)
         {
-            //string albumId = id.ToString();
-
-            //Album album = db.Albums.Find(id);
             var album = await context.LoadAsync<Album>(id).ConfigureAwait(false);
 
             return View(album);
@@ -56,14 +52,14 @@ namespace MvcMusicStore.Controllers
         public async Task<ActionResult> Create()
         {
 
-            //Get all items from dynamo DB.
+            //Get all genres and artists items.
             var conditions = new List<ScanCondition>();
 
             var genres = await context.ScanAsync<Genre>(conditions).GetRemainingAsync();
             var artists = await context.ScanAsync<Artist>(conditions).GetRemainingAsync();
 
             ViewBag.GenreGUID = new SelectList(genres, "GenreGUID", "Name");
-            ViewBag.ArtistGUID = new SelectList(artists, "GenreGUID", "Name");
+            ViewBag.ArtistGUID = new SelectList(artists, "ArtistGUID", "Name");
             return View();
         }
 
@@ -71,19 +67,27 @@ namespace MvcMusicStore.Controllers
         // POST: /StoreManager/Create
 
         [HttpPost]
-        public ActionResult Create(Album album)
+        public async Task<ActionResult> Create(Album album)
         {
+
+            //Get all genres and artists items.
+            var conditions = new List<ScanCondition>();
+            var genres = await context.ScanAsync<Genre>(conditions).GetRemainingAsync();
+            var artists = await context.ScanAsync<Artist>(conditions).GetRemainingAsync();
+
+
             if (ModelState.IsValid)
             {
-                //db.Albums.Add(album);
-                //db.SaveChanges();
                 album.UniqueId = "A#" + Guid.NewGuid().ToString();
+                album.Genre = genres.Find(g => g.GenreGUID == album.GenreGUID);
+                album.Artist = artists.Find(ar => ar.ArtistGUID == album.ArtistGUID);
+
                 context.Save(album);
                 return RedirectToAction("Index");
             }
 
-            ViewBag.GenreGUID = new SelectList(db.Genres, "GenreGUID", "Name", album.Genre.GenreGUID);
-            ViewBag.ArtistGUID = new SelectList(db.Artists, "ArtistGUID", "Name", album.Artist.ArtistGUID);
+            ViewBag.GenreGUID = new SelectList(genres, "GenreGUID", "Name", album.GenreGUID);
+            ViewBag.ArtistGUID = new SelectList(artists, "ArtistGUID", "Name", album.ArtistGUID);
             return View(album);
         }
 
@@ -100,8 +104,8 @@ namespace MvcMusicStore.Controllers
             var genres = await context.ScanAsync<Genre>(conditions).GetRemainingAsync();
             var artists = await context.ScanAsync<Artist>(conditions).GetRemainingAsync();
 
-            ViewBag.GenreGUID = new SelectList(genres, "GenreGUID", "Name", album.Genre.GenreGUID);
-            ViewBag.ArtistGUID = new SelectList(artists, "ArtistGUID", "Name", album.Artist.ArtistGUID);
+            ViewBag.GenreGUID = new SelectList(genres, "GenreGUID", "Name", album.GenreGUID);
+            ViewBag.ArtistGUID = new SelectList(artists, "ArtistGUID", "Name", album.ArtistGUID);
             return View(album);
         }
 
@@ -111,21 +115,23 @@ namespace MvcMusicStore.Controllers
         [HttpPost]
         public async Task<ActionResult> Edit(Album album)
         {
+
+            var conditions = new List<ScanCondition>();
+            var genres = await context.ScanAsync<Genre>(conditions).GetRemainingAsync();
+            var artists = await context.ScanAsync<Artist>(conditions).GetRemainingAsync();
+
             if (ModelState.IsValid)
             {
-                //db.Entry(album).State = System.Data.Entity.EntityState.Modified;
-                //db.SaveChanges();
+                album.Genre = genres.Find(g => g.GenreGUID == album.GenreGUID);
+                album.Artist = artists.Find(ar => ar.ArtistGUID == album.ArtistGUID);
 
                 await context.SaveAsync(album);
 
                 return RedirectToAction("Index");
             }
-            var conditions = new List<ScanCondition>();
-            var genres = await context.ScanAsync<Genre>(conditions).GetRemainingAsync();
-            var artists = await context.ScanAsync<Artist>(conditions).GetRemainingAsync();
 
-            ViewBag.GenreGUID = new SelectList(genres, "GenreGUID", "Name", album.Genre.GenreGUID);
-            ViewBag.ArtistGUID = new SelectList(artists, "ArtistGUID", "Name", album.Artist.ArtistGUID);
+            ViewBag.GenreGUID = new SelectList(genres, "GenreGUID", "Name", album.GenreGUID);
+            ViewBag.ArtistGUID = new SelectList(artists, "ArtistGUID", "Name", album.ArtistGUID);
             return View(album);
         }
 
