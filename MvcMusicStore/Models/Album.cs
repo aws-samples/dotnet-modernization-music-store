@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Web.Mvc;
@@ -9,13 +10,13 @@ namespace MvcMusicStore.Models
     public class Album
     {
         [ScaffoldColumn(false)]
-        public int AlbumId { get; set; }
+        public Guid AlbumId { get; set; }
 
         [DisplayName("Genre")]
-        public int GenreId { get; set; }
+        public string GenreId { get; set; }
 
         [DisplayName("Artist")]
-        public int ArtistId { get; set; }
+        public string ArtistId { get; set; }
 
         [Required(ErrorMessage = "An Album Title is required")]
         [StringLength(160)]

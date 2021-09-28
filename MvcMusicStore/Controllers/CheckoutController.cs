@@ -63,7 +63,7 @@ namespace MvcMusicStore.Controllers
         //
         // GET: /Checkout/Complete
 
-        public ActionResult Complete(int id)
+        public ActionResult Complete(Guid id)
         {
             // Validate customer owns this order
             bool isValid = storeDB.Orders.Any(

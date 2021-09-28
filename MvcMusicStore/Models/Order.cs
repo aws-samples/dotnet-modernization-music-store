@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Web.Mvc;
@@ -9,7 +10,7 @@ namespace MvcMusicStore.Models
     public partial class Order
     {
         [ScaffoldColumn(false)]
-        public int OrderId { get; set; }
+        public Guid OrderId { get; set; }
 
         [ScaffoldColumn(false)]
         public System.DateTime OrderDate { get; set; }

@@ -57,7 +57,7 @@ c => c.CartId == ShoppingCartId
             storeDB.SaveChanges();
         }
 
-        public int RemoveFromCart(int id)
+        public int RemoveFromCart(Guid id)
         {
             // Get the cart
             var cartItem = storeDB.Carts.Single(
@@ -125,7 +125,7 @@ cart => cart.CartId == ShoppingCartId
             return total ?? decimal.Zero;
         }
 
-        public int CreateOrder(Order order)
+        public Guid CreateOrder(Order order)
         {
             decimal orderTotal = 0;
 
