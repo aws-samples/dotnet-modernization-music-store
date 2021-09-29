@@ -8,6 +8,7 @@ namespace MvcMusicStore.ViewModels
         public decimal CartTotal { get; set; }
         public int CartCount { get; set; }
         public int ItemCount { get; set; }
-        public Guid DeleteId { get; set; }
+
+        public string AlbumId { get; set; }
     }
 }

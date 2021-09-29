@@ -9,18 +9,18 @@
         $(".RemoveLink").click(function () {
             // Get the id from the link
             var recordToDelete = $(this).attr("data-id");
-
+            var quantityLeft = parseInt($(this).attr("data-count")) - 1
             if (recordToDelete != '') {
 
                 // Perform the ajax post
-                $.post("/ShoppingCart/RemoveFromCart", { "id": recordToDelete },
+                $.post("/ShoppingCart/RemoveFromCart", { "id": recordToDelete, "quantityLeft": quantityLeft },
                     function (data) {
                         // Successful requests get here
                         // Update the page elements
                         if (data.ItemCount == 0) {
-                            $('#row-' + data.DeleteId).fadeOut('slow');
+                            $('#row-' + data.AlbumId).fadeOut('slow');
                         } else {
-                            $('#item-count-' + data.DeleteId).text(data.ItemCount);
+                            $('#item-count-' + data.AlbumId).text(data.ItemCount);
                         }
 
                         $('#cart-total').text(data.CartTotal);
@@ -40,9 +40,9 @@
 
         // Update the page elements
         if (data.ItemCount == 0) {
-            $('#row-' + data.DeleteId).fadeOut('slow');
+            $('#row-' + data.AlbumId).fadeOut('slow');
         } else {
-            $('#item-count-' + data.DeleteId).text(data.ItemCount);
+            $('#item-count-' + data.AlbumId).text(data.ItemCount);
         }
 
         $('#cart-total').text(data.CartTotal);
@@ -73,18 +73,18 @@
     </tr>
     @foreach (var item in Model.CartItems)
     {
-        <tr id="row-@item.RecordId">
+        <tr id="row-@item.AlbumId">
             <td>
                 @Html.ActionLink(item.Album.Title, "Details", "Store", new { id = item.AlbumId }, null)
             </td>
             <td>
                 @item.Album.Price
             </td>
-            <td id="item-count-@item.RecordId">
+            <td id="item-count-@item.AlbumId">
                 @item.Count
             </td>
             <td>
-                <a href="#" class="RemoveLink" data-id="@item.RecordId">Remove from cart</a>
+                <a href="#" class="RemoveLink" data-count="@item.Count" data-id="@item.AlbumId">Remove from cart</a>
             </td>
         </tr>
     }

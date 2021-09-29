@@ -2,6 +2,7 @@
 using MvcMusicStore.ViewModels;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web.Mvc;
 
 namespace MvcMusicStore.Controllers
@@ -31,7 +32,7 @@ namespace MvcMusicStore.Controllers
         //
         // GET: /Store/AddToCart/5
 
-        public ActionResult AddToCart(Guid id)
+        public async Task<ActionResult> AddToCart(Guid id)
         {
 
             // Retrieve the album from the database
@@ -41,7 +42,7 @@ namespace MvcMusicStore.Controllers
             // Add it to the shopping cart
             var cart = ShoppingCart.GetCart(this.HttpContext);
 
-            cart.AddToCart(addedAlbum);
+            await cart.AddToCart(addedAlbum);
 
             // Go back to the main store page for more shopping
             return RedirectToAction("Index");
@@ -51,27 +52,27 @@ namespace MvcMusicStore.Controllers
         // AJAX: /ShoppingCart/RemoveFromCart/5
 
         [HttpPost]
-        public ActionResult RemoveFromCart(Guid id)
+        public async Task<ActionResult> RemoveFromCart(Guid id, int quantityLeft)
         {
             // Remove the item from the cart
             var cart = ShoppingCart.GetCart(this.HttpContext);
 
             // Get the name of the album to display confirmation
-            string albumName = storeDB.Carts
-                .Single(item => item.RecordId == id).Album.Title;
+            var album = storeDB.Albums
+                .Single(item => item.AlbumId == id);
 
             // Remove from cart
-            int itemCount = cart.RemoveFromCart(id);
+            int itemCount = await cart.RemoveFromCart(id, quantityLeft);
 
             // Display the confirmation message
             var results = new ShoppingCartRemoveViewModel
             {
-                Message = Server.HtmlEncode(albumName) +
+                Message = Server.HtmlEncode(album.Title) +
                     " has been removed from your shopping cart.",
                 CartTotal = cart.GetTotal(),
                 CartCount = cart.GetCount(),
                 ItemCount = itemCount,
-                DeleteId = id
+                AlbumId = album.AlbumId.ToString()
             };
 
             return Json(results);

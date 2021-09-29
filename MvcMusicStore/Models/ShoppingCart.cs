@@ -1,6 +1,11 @@
-﻿using System;
+﻿using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.DataModel;
+using Amazon.DynamoDBv2.Model;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 
@@ -8,16 +13,28 @@ namespace MvcMusicStore.Models
 {
     public partial class ShoppingCart
     {
-        MusicStoreEntities storeDB = new MusicStoreEntities();
+
+        const string COUNT_ATTRIBUTE = "count";
+        const string ALBUM_ATTRIBUTE = "albumDetail";
+
+        private AmazonDynamoDBClient dynamoClient;
+        private DynamoDBContext context;
 
         string ShoppingCartId { get; set; }
 
         public const string CartSessionKey = "CartId";
+        string _tableGallery = "Cart";
+
+        MusicStoreEntities storeDB = new MusicStoreEntities();
 
         public static ShoppingCart GetCart(HttpContextBase context)
         {
             var cart = new ShoppingCart();
             cart.ShoppingCartId = cart.GetCartId(context);
+
+            // set DynamoDB Context.
+            cart.dynamoClient = new AmazonDynamoDBClient();
+            cart.context = new DynamoDBContext(cart.dynamoClient);
             return cart;
         }
 
@@ -27,89 +44,93 @@ namespace MvcMusicStore.Models
             return GetCart(controller.HttpContext);
         }
 
-        public void AddToCart(Album album)
+        public async Task AddToCart(Album album)
         {
-            // Get the matching cart and album instances
-            var cartItem = storeDB.Carts.SingleOrDefault(
-c => c.CartId == ShoppingCartId
-&& c.AlbumId == album.AlbumId);
 
-            if (cartItem == null)
+            var request = new UpdateItemRequest
             {
-                // Create a new cart item if no cart item exists
-                cartItem = new Cart
+                TableName = _tableGallery,
+                Key = new Dictionary<string, AttributeValue>
+                        {
+                            {"cartId", new AttributeValue{S = this.ShoppingCartId } },
+                            {"albumId", new AttributeValue{S = $"album#{album.AlbumId}" } }
+                        },
+                UpdateExpression = "ADD #count :increment SET #albumDetail = :albumDetail",
+
+                ExpressionAttributeNames = new Dictionary<string, string>
+                        {
+                            { "#count", COUNT_ATTRIBUTE},
+                            { "#albumDetail", ALBUM_ATTRIBUTE },
+                        },
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                        {
+                            {":increment", new AttributeValue{N = "1"}},
+                            {":albumDetail", new AttributeValue{S = JsonConvert.SerializeObject(album)}}
+                        },
+                ReturnValues = ReturnValue.UPDATED_NEW
+            };
+
+            await dynamoClient.UpdateItemAsync(request);
+        }
+
+        /// <summary>
+        /// Remove album from cart. Quantity provided will overwrite existing quantity for a specific product in cart, 
+        /// rather than adding to it.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<int> RemoveFromCart(Guid albumId, int count)
+        {
+            // if count is greater 0. then overwrite existing quantity for a specific product in cart.
+            if (count > 0)
+            {
+                var request = new UpdateItemRequest
                 {
-                    RecordId = Guid.NewGuid(),
-                    AlbumId = album.AlbumId,
-                    CartId = ShoppingCartId,
-                    Count = 1,
-                    DateCreated = DateTime.Now
+                    TableName = _tableGallery,
+                    Key = new Dictionary<string, AttributeValue>
+                        {
+                            {"cartId", new AttributeValue{S = this.ShoppingCartId } },
+                            {"albumId", new AttributeValue{S = $"album#{albumId}" } }
+                        },
+                    UpdateExpression = "SET #count :count",
+
+                    ExpressionAttributeNames = new Dictionary<string, string>
+                        {
+                            { "#count", COUNT_ATTRIBUTE}
+                        },
+                    ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                        {
+                            {":count", new AttributeValue{N = count.ToString()}},
+                        },
+                    ReturnValues = ReturnValue.UPDATED_NEW
                 };
 
-                storeDB.Carts.Add(cartItem);
+                await dynamoClient.UpdateItemAsync(request);
             }
             else
             {
-                // If the item does exist in the cart, then add one to the quantity
-                cartItem.Count++;
+                // remove item from cart.
+                context.Delete<string>(this.ShoppingCartId, rangeKey: $"album#{albumId}");
             }
 
-            // Save changes
-            storeDB.SaveChanges();
-        }
-
-        public int RemoveFromCart(Guid id)
-        {
-            // Get the cart
-            var cartItem = storeDB.Carts.Single(
-cart => cart.CartId == ShoppingCartId
-&& cart.RecordId == id);
-
-            int itemCount = 0;
-
-            if (cartItem != null)
-            {
-                if (cartItem.Count > 1)
-                {
-                    cartItem.Count--;
-                    itemCount = cartItem.Count;
-                }
-                else
-                {
-                    storeDB.Carts.Remove(cartItem);
-                }
-
-                // Save changes
-                storeDB.SaveChanges();
-            }
-
-            return itemCount;
+            return count;
         }
 
         public void EmptyCart()
         {
-            var cartItems = storeDB.Carts.Where(cart => cart.CartId == ShoppingCartId);
-
-            foreach (var cartItem in cartItems)
-            {
-                storeDB.Carts.Remove(cartItem);
-            }
-
-            // Save changes
-            storeDB.SaveChanges();
+            context.Delete<string>(this.ShoppingCartId);
         }
 
         public List<Cart> GetCartItems()
         {
-            return storeDB.Carts.Where(cart => cart.CartId == ShoppingCartId).ToList();
+            var cartItems = context.Query<Cart>(this.ShoppingCartId, Amazon.DynamoDBv2.DocumentModel.QueryOperator.BeginsWith, "album");
+
+            return cartItems.ToList();
         }
 
         public int GetCount()
         {
             // Get the count of each item in the cart and sum them up
-            int? count = (from cartItems in storeDB.Carts
-                          where cartItems.CartId == ShoppingCartId
-                          select (int?)cartItems.Count).Sum();
+            int? count = GetCartItems().Sum(i => i.Count);
 
             // Return 0 if all entries are null
             return count ?? 0;
@@ -120,9 +141,8 @@ cart => cart.CartId == ShoppingCartId
             // Multiply album price by count of that album to get 
             // the current price for each of those albums in the cart
             // sum all album price totals to get the cart total
-            decimal? total = (from cartItems in storeDB.Carts
-                              where cartItems.CartId == ShoppingCartId
-                              select (int?)cartItems.Count * cartItems.Album.Price).Sum();
+            decimal? total = GetCartItems().Sum(cartItem => cartItem.Count * cartItem.Album.Price);
+            
             return total ?? decimal.Zero;
         }
 
@@ -138,7 +158,7 @@ cart => cart.CartId == ShoppingCartId
                 var orderDetail = new OrderDetail
                 {
                     OrderDetailId = Guid.NewGuid(),
-                    AlbumId = item.AlbumId,
+                    AlbumId = item.Album.AlbumId,
                     OrderId = order.OrderId,
                     UnitPrice = item.Album.Price,
                     Quantity = item.Count
@@ -190,13 +210,13 @@ cart => cart.CartId == ShoppingCartId
         // be associated with their username
         public void MigrateCart(string userName)
         {
-            var shoppingCart = storeDB.Carts.Where(c => c.CartId == ShoppingCartId);
+            //var shoppingCart = storeDB.Carts.Where(c => c.CartId == ShoppingCartId);
 
-            foreach (Cart item in shoppingCart)
-            {
-                item.CartId = userName;
-            }
-            storeDB.SaveChanges();
+            //foreach (Cart item in shoppingCart)
+            //{
+            //    item.CartId = userName;
+            //}
+            //storeDB.SaveChanges();
         }
     }
 }
