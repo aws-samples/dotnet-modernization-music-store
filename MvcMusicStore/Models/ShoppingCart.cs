@@ -39,6 +39,7 @@ c => c.CartId == ShoppingCartId
                 // Create a new cart item if no cart item exists
                 cartItem = new Cart
                 {
+                    RecordId = Guid.NewGuid(),
                     AlbumId = album.AlbumId,
                     CartId = ShoppingCartId,
                     Count = 1,
@@ -136,6 +137,7 @@ cart => cart.CartId == ShoppingCartId
             {
                 var orderDetail = new OrderDetail
                 {
+                    OrderDetailId = Guid.NewGuid(),
                     AlbumId = item.AlbumId,
                     OrderId = order.OrderId,
                     UnitPrice = item.Album.Price,

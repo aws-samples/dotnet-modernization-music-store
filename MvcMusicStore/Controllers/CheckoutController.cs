@@ -25,7 +25,7 @@ namespace MvcMusicStore.Controllers
         [HttpPost]
         public ActionResult AddressAndPayment(FormCollection values)
         {
-            var order = new Order();
+            var order = new Order() { OrderId = Guid.NewGuid() };
             TryUpdateModel(order);
 
             try
