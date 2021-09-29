@@ -1,5 +1,6 @@
 ﻿using MvcMusicStore.Models;
 using MvcMusicStore.ViewModels;
+using System;
 using System.Linq;
 using System.Web.Mvc;
 
@@ -30,7 +31,7 @@ namespace MvcMusicStore.Controllers
         //
         // GET: /Store/AddToCart/5
 
-        public ActionResult AddToCart(int id)
+        public ActionResult AddToCart(Guid id)
         {
 
             // Retrieve the album from the database
@@ -50,7 +51,7 @@ namespace MvcMusicStore.Controllers
         // AJAX: /ShoppingCart/RemoveFromCart/5
 
         [HttpPost]
-        public ActionResult RemoveFromCart(int id)
+        public ActionResult RemoveFromCart(Guid id)
         {
             // Remove the item from the cart
             var cart = ShoppingCart.GetCart(this.HttpContext);

@@ -10,115 +10,31 @@ namespace MvcMusicStore.Models.DynamoDb
     [DynamoDBTable("AlbumFlat")]
     public class AlbumFlat : Album
     {
-        private string _genreGUID;
-        private string _albumGUID;
-        private string _artistGUID;
-        private string _gs1sk;
-        private string _gs2pk;
-        private string _gs2sk;
-
-        [DynamoDBHashKey("PK")]
-        public string UniqueId { get; set; }
+        private Guid? _gs1PK;
+        private string _gs1SK;
+        private string _gs2SK;
 
         [DynamoDBRangeKey("SK")]
-        public string AlbumGUID
+        public string Type { get; set; } = "METADATA";
+
+        public Guid GS1PK
         {
-            get
-            {
-                return _albumGUID ?? UniqueId;
-            }
-            set
-            {
-                _albumGUID = value;
-            }
+            get { return _gs1PK ?? GenreId; }
+            set { _gs1PK = value; }
         }
 
-
-        public string GS1PK { get; set; }
-
-        public string GS1SK
-        {
-            get
-            {
-                return _gs1sk ?? $"ALBUM#{UniqueId}";
-            }
-            set
-            {
-                _gs1sk = value;
-            }
+        public string GS1SK 
+        { 
+            get { return _gs1SK ?? $"ALBUM#{AlbumId}"; }
+            set { _gs1SK = value; }
         }
 
-
-        public string GS2PK
-        {
-            get
-            {
-                return _gs2pk ?? "ALBUM";
-            }
-            set
-            {
-                _gs2pk = value;
-            }
-        }
+        public string GS2PK { get; set; } = "ALBUM";
 
         public string GS2SK
         {
-            get
-            {
-                return _gs2sk ?? $"ALBUM#{UniqueId}";
-            }
-            set
-            {
-                _gs2sk = value;
-            }
-        }
-
-        [DynamoDBIgnore]
-        public string GenreGUID
-        {
-            get
-            {
-
-                if (!string.IsNullOrEmpty(_genreGUID))
-                {
-                    return _genreGUID;
-                }
-
-                if (Genre != null)
-                {
-                    return Genre.GenreGUID;
-                }
-
-                return null;
-            }
-            set
-            {
-                _genreGUID = value;
-            }
-        }
-
-        [DynamoDBIgnore]
-        public string ArtistGUID
-        {
-            get
-            {
-
-                if (!string.IsNullOrEmpty(_artistGUID))
-                {
-                    return _artistGUID;
-                }
-
-                if (Artist != null)
-                {
-                    return Artist.ArtistGUID;
-                }
-
-                return null;
-            }
-            set
-            {
-                _artistGUID = value;
-            }
+            get { return _gs2SK ?? $"ALBUM#{AlbumId}"; }
+            set { _gs2SK = value; }
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Amazon.DynamoDBv2.DataModel;
 using MvcMusicStore.Models.DynamoDb;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -11,15 +12,17 @@ namespace MvcMusicStore.Models
     public class Album
     {
         [ScaffoldColumn(false)]
-        [DynamoDBIgnore]
-        // DynamoDB stream will manage the AlbumId and maintain backward compatibility in RDS database.
-        public int AlbumId { get; set; }
+        [Key]
+        [DynamoDBHashKey("PK")]
+        public Guid AlbumId { get; set; }
 
+        [DisplayName("Genre")]
         [DynamoDBIgnore]
-        public int GenreId { get; set; }
+        public Guid GenreId { get; set; }
 
+        [DisplayName("Artist")]
         [DynamoDBIgnore]
-        public int ArtistId { get; set; }
+        public Guid ArtistId { get; set; }
 
         [Required(ErrorMessage = "An Album Title is required")]
         [StringLength(160)]

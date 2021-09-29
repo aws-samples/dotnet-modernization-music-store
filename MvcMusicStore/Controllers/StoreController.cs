@@ -1,4 +1,5 @@
 ﻿using MvcMusicStore.Models;
+using System;
 using System.Linq;
 using System.Web.Mvc;
 
@@ -33,7 +34,7 @@ namespace MvcMusicStore.Controllers
         //
         // GET: /Store/Details/5
 
-        public ActionResult Details(int id)
+        public ActionResult Details(Guid id)
         {
             var album = storeDB.Albums.Find(id);
 

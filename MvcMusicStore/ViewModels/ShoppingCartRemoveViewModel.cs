@@ -1,4 +1,6 @@
-﻿namespace MvcMusicStore.ViewModels
+﻿using System;
+
+namespace MvcMusicStore.ViewModels
 {
     public class ShoppingCartRemoveViewModel
     {
@@ -6,6 +8,6 @@
         public decimal CartTotal { get; set; }
         public int CartCount { get; set; }
         public int ItemCount { get; set; }
-        public int DeleteId { get; set; }
+        public Guid DeleteId { get; set; }
     }
 }

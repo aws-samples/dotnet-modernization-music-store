@@ -124,7 +124,9 @@
     <Compile Include="Models\Artist.cs" />
     <Compile Include="Models\Cart.cs" />
     <Compile Include="Models\DynamoDb\AlbumFlat.cs" />
+    <Compile Include="Models\DynamoDb\ArtistFlat.cs" />
     <Compile Include="Models\DynamoDb\ArtistTypeConverter.cs" />
+    <Compile Include="Models\DynamoDb\GenreFlat.cs" />
     <Compile Include="Models\DynamoDb\GenreTypeConverter.cs" />
     <Compile Include="Models\Genre.cs" />
     <Compile Include="Models\MusicStoreEntities.cs" />

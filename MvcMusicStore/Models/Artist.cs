@@ -1,20 +1,16 @@
 ﻿using Amazon.DynamoDBv2.DataModel;
+using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace MvcMusicStore.Models
 {
-    [DynamoDBTable("AlbumFlat")]
     public class Artist
     {
-        [DynamoDBHashKey("PK")]
-        public string Type { get; set; }
-
+        [Key]
         [DynamoDBRangeKey("SK")]
-        public string ArtistGUID { get; set; }
-
-        [DynamoDBIgnore]
-        public int ArtistId { get; set; }
+        public Guid ArtistId { get; set; }
         
-        [DynamoDBProperty("Artist")]
+        [DynamoDBProperty]
         public string Name { get; set; }
     }
 }

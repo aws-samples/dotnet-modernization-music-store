@@ -43,9 +43,9 @@ namespace MvcMusicStore.Controllers
         //
         // GET: /StoreManager/Details/5
 
-        public ViewResult Details(string id)
+        public ViewResult Details(Guid id)
         {
-            var album = context.Query<AlbumFlat>(id, QueryOperator.Equal, new[] { id });
+            var album = context.Query<AlbumFlat>(id.ToString().ToUpper(), QueryOperator.Equal, new[] { "METADATA" });
 
             return View(album.FirstOrDefault());
         }
@@ -53,12 +53,12 @@ namespace MvcMusicStore.Controllers
         //
         // GET: /StoreManager/Create
 
-        public async Task<ActionResult> Create()
+        public ActionResult Create()
         {
 
             //Get all genres and artists items.
-            var genres = context.Query<Genre>("GENRE", QueryOperator.BeginsWith, new[] { "GENRE" });
-            var artists = context.Query<Artist>("ARTIST", QueryOperator.BeginsWith, new[] { "ARTIST" });
+            var genres = context.Query<GenreFlat>("GENRE", QueryOperator.BeginsWith, new[] { "GENRE" });
+            var artists = context.Query<ArtistFlat>("ARTIST", QueryOperator.BeginsWith, new[] { "ARTIST" });
 
             ViewBag.GenreGUID = new SelectList(genres, "GenreGUID", "Name");
             ViewBag.ArtistGUID = new SelectList(artists, "ArtistGUID", "Name");
@@ -73,40 +73,40 @@ namespace MvcMusicStore.Controllers
         {
 
             //Get all genres and artists items.
-            var genres = context.Query<Genre>("GENRE", QueryOperator.BeginsWith, new[] { "GENRE" });
-            var artists = context.Query<Artist>("ARTIST", QueryOperator.BeginsWith, new[] { "ARTIST" });
+            var genres = context.Query<GenreFlat>("GENRE", QueryOperator.BeginsWith, new[] { "GENRE" });
+            var artists = context.Query<ArtistFlat>("ARTIST", QueryOperator.BeginsWith, new[] { "ARTIST" });
 
 
             if (ModelState.IsValid)
             {
-                album.UniqueId = "A#" + Guid.NewGuid().ToString();
-                album.Genre = genres.FirstOrDefault(g => g.GenreGUID == album.GenreGUID);
-                album.Artist = artists.FirstOrDefault(ar => ar.ArtistGUID == album.ArtistGUID);
+                album.AlbumId = Guid.NewGuid();
+                album.Genre = genres.FirstOrDefault(g => g.GenreId == album.GenreId);
+                album.Artist = artists.FirstOrDefault(ar => ar.ArtistId == album.ArtistId);
 
                 context.Save(album);
                 return RedirectToAction("Index");
             }
 
-            ViewBag.GenreGUID = new SelectList(genres, "GenreGUID", "Name", album.GenreGUID);
-            ViewBag.ArtistGUID = new SelectList(artists, "ArtistGUID", "Name", album.ArtistGUID);
+            ViewBag.GenreGUID = new SelectList(genres, "GenreGUID", "Name", album.GenreId);
+            ViewBag.ArtistGUID = new SelectList(artists, "ArtistGUID", "Name", album.ArtistId);
             return View(album);
         }
 
         //
         // GET: /StoreManager/Edit/5
 
-        public ActionResult Edit(string id)
+        public ActionResult Edit(Guid id)
         {
             //Album album = db.Albums.Find(id);
 
-            var album = context.Query<AlbumFlat>(id, QueryOperator.Equal, new[] { id }).FirstOrDefault();
+            var album = context.Query<AlbumFlat>(id.ToString().ToUpper(), QueryOperator.Equal, new[] { id }).FirstOrDefault();
 
             //Get all genres and artists items.
-            var genres = context.Query<Genre>("GENRE", QueryOperator.BeginsWith, new[] { "GENRE" });
-            var artists = context.Query<Artist>("ARTIST", QueryOperator.BeginsWith, new[] { "ARTIST" });
+            var genres = context.Query<GenreFlat>("GENRE", QueryOperator.BeginsWith, new[] { "GENRE" });
+            var artists = context.Query<ArtistFlat>("ARTIST", QueryOperator.BeginsWith, new[] { "ARTIST" });
 
-            ViewBag.GenreGUID = new SelectList(genres, "GenreGUID", "Name", album.GenreGUID);
-            ViewBag.ArtistGUID = new SelectList(artists, "ArtistGUID", "Name", album.ArtistGUID);
+            ViewBag.GenreGUID = new SelectList(genres, "GenreGUID", "Name", album.GenreId);
+            ViewBag.ArtistGUID = new SelectList(artists, "ArtistGUID", "Name", album.ArtistId);
             return View(album);
         }
 
@@ -118,31 +118,31 @@ namespace MvcMusicStore.Controllers
         {
 
             //Get all genres and artists items.
-            var genres = context.Query<Genre>("GENRE", QueryOperator.BeginsWith, new[] { "GENRE" });
-            var artists = context.Query<Artist>("ARTIST", QueryOperator.BeginsWith, new[] { "ARTIST" });
+            var genres = context.Query<GenreFlat>("GENRE", QueryOperator.BeginsWith, new[] { "GENRE" });
+            var artists = context.Query<ArtistFlat>("ARTIST", QueryOperator.BeginsWith, new[] { "ARTIST" });
 
             if (ModelState.IsValid)
             {
-                album.Genre = genres.FirstOrDefault(g => g.GenreGUID == album.GenreGUID);
-                album.Artist = artists.FirstOrDefault(ar => ar.ArtistGUID == album.ArtistGUID);
+                album.Genre = genres.FirstOrDefault(g => g.GenreId == album.GenreId);
+                album.Artist = artists.FirstOrDefault(ar => ar.ArtistId == album.ArtistId);
 
                 await context.SaveAsync(album);
 
                 return RedirectToAction("Index");
             }
 
-            ViewBag.GenreGUID = new SelectList(genres, "GenreGUID", "Name", album.GenreGUID);
-            ViewBag.ArtistGUID = new SelectList(artists, "ArtistGUID", "Name", album.ArtistGUID);
+            ViewBag.GenreGUID = new SelectList(genres, "GenreGUID", "Name", album.GenreId);
+            ViewBag.ArtistGUID = new SelectList(artists, "ArtistGUID", "Name", album.ArtistId);
             return View(album);
         }
 
         //
         // GET: /StoreManager/Delete/5
 
-        public async Task<ActionResult> Delete(string id)
+        public ActionResult Delete(Guid id)
         {
             //Album album = db.Albums.Find(id);
-            var album = context.Query<AlbumFlat>(id, QueryOperator.Equal, new[] { id }).FirstOrDefault();
+            var album = context.Query<AlbumFlat>(id.ToString().ToUpper(), QueryOperator.Equal, new[] { id }).FirstOrDefault();
 
             return View(album);
         }
@@ -151,13 +151,13 @@ namespace MvcMusicStore.Controllers
         // POST: /StoreManager/Delete/5
 
         [HttpPost, ActionName("Delete")]
-        public async Task<ActionResult> DeleteConfirmed(string id)
+        public ActionResult DeleteConfirmed(Guid id)
         {
             //Album album = db.Albums.Find(id);
             //db.Albums.Remove(album);
             //db.SaveChanges();
 
-            context.Delete<AlbumFlat>(id,id);
+            context.Delete<AlbumFlat>(id.ToString().ToUpper(), "METADATA");
 
             return RedirectToAction("Index");
         }

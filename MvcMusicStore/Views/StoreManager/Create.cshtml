@@ -19,7 +19,7 @@
         </div>
         <div class="editor-field">
             @Html.DropDownList("GenreGUID", String.Empty)
-            @Html.ValidationMessageFor(model => model.GenreGUID)
+            @Html.ValidationMessageFor(model => model.GenreId)
         </div>
 
         <div class="editor-label">
@@ -27,7 +27,7 @@
         </div>
         <div class="editor-field">
             @Html.DropDownList("ArtistGUID", String.Empty)
-            @Html.ValidationMessageFor(model => model.ArtistGUID)
+            @Html.ValidationMessageFor(model => model.ArtistId)
         </div>
 
         <div class="editor-label">
