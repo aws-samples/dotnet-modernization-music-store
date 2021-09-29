@@ -1,9 +1,11 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace MvcMusicStore.Models
 {
     public class OrderDetail
     {
+        [Key]
         public Guid OrderDetailId { get; set; }
         public Guid OrderId { get; set; }
         public Guid AlbumId { get; set; }

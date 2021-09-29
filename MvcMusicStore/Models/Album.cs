@@ -10,13 +10,14 @@ namespace MvcMusicStore.Models
     public class Album
     {
         [ScaffoldColumn(false)]
+        [Key]
         public Guid AlbumId { get; set; }
 
         [DisplayName("Genre")]
-        public string GenreId { get; set; }
+        public Guid GenreId { get; set; }
 
         [DisplayName("Artist")]
-        public string ArtistId { get; set; }
+        public Guid ArtistId { get; set; }
 
         [Required(ErrorMessage = "An Album Title is required")]
         [StringLength(160)]

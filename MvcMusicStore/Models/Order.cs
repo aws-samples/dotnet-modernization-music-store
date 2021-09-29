@@ -10,6 +10,7 @@ namespace MvcMusicStore.Models
     public partial class Order
     {
         [ScaffoldColumn(false)]
+        [Key]
         public Guid OrderId { get; set; }
 
         [ScaffoldColumn(false)]
