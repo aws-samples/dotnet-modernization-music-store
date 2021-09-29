@@ -39,6 +39,7 @@ c => c.CartId == ShoppingCartId
                 // Create a new cart item if no cart item exists
                 cartItem = new Cart
                 {
+                    RecordId = Guid.NewGuid(),
                     AlbumId = album.AlbumId,
                     CartId = ShoppingCartId,
                     Count = 1,
@@ -57,7 +58,7 @@ c => c.CartId == ShoppingCartId
             storeDB.SaveChanges();
         }
 
-        public int RemoveFromCart(int id)
+        public int RemoveFromCart(Guid id)
         {
             // Get the cart
             var cartItem = storeDB.Carts.Single(
@@ -125,7 +126,7 @@ cart => cart.CartId == ShoppingCartId
             return total ?? decimal.Zero;
         }
 
-        public int CreateOrder(Order order)
+        public Guid CreateOrder(Order order)
         {
             decimal orderTotal = 0;
 
@@ -136,6 +137,7 @@ cart => cart.CartId == ShoppingCartId
             {
                 var orderDetail = new OrderDetail
                 {
+                    OrderDetailId = Guid.NewGuid(),
                     AlbumId = item.AlbumId,
                     OrderId = order.OrderId,
                     UnitPrice = item.Album.Price,

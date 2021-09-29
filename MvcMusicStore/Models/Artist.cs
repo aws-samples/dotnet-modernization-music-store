@@ -1,8 +1,12 @@
-﻿namespace MvcMusicStore.Models
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+
+namespace MvcMusicStore.Models
 {
     public class Artist
     {
-        public int ArtistId { get; set; }
+        [Key]
+        public Guid ArtistId { get; set; }
         public string Name { get; set; }
     }
 }
