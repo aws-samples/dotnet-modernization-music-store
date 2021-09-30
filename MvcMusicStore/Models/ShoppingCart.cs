@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -107,12 +108,13 @@ cart => cart.CartId == ShoppingCartId
         public int GetCount()
         {
             // Get the count of each item in the cart and sum them up
-            int? count = (from cartItems in storeDB.Carts
-                          where cartItems.CartId == ShoppingCartId
-                          select (int?)cartItems.Count).Sum();
+            var q = from cartItems in storeDB.Carts
+                              where cartItems.CartId == this.ShoppingCartId
+                              select (decimal?)cartItems.Count;
+            Debug.WriteLine($"Getting cart item count query:\n{q}");
 
             // Return 0 if all entries are null
-            return count ?? 0;
+            return (int?)q.Sum() ?? 0;
         }
 
         public decimal GetTotal()
@@ -120,10 +122,12 @@ cart => cart.CartId == ShoppingCartId
             // Multiply album price by count of that album to get 
             // the current price for each of those albums in the cart
             // sum all album price totals to get the cart total
-            decimal? total = (from cartItems in storeDB.Carts
-                              where cartItems.CartId == ShoppingCartId
-                              select (int?)cartItems.Count * cartItems.Album.Price).Sum();
-            return total ?? decimal.Zero;
+            var q = from cartItems in storeDB.Carts
+                              where cartItems.CartId == this.ShoppingCartId
+                              select cartItems.Count * (double?)cartItems.Album.Price;
+            Debug.WriteLine($"Getting cart total amount query:\n{q}");
+
+            return (decimal?)q.Sum() ?? decimal.Zero;
         }
 
         public Guid CreateOrder(Order order)
