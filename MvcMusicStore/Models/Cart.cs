@@ -20,7 +20,7 @@ namespace MvcMusicStore.Models
             }
             set
             {
-                _albumId = value; 
+                _albumId = value.ToString();
             }
         }
         

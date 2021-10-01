@@ -20,7 +20,6 @@ namespace MvcMusicStore.Models
 
         private AmazonDynamoDBClient dynamoClient;
         private DynamoDBContext context;
-        private Table dynamoDbCartTable;
 
         string ShoppingCartId { get; set; }
 
@@ -36,7 +35,6 @@ namespace MvcMusicStore.Models
 
             // set DynamoDB Context.
             cart.dynamoClient = new AmazonDynamoDBClient();
-            cart.dynamoDbCartTable = Table.LoadTable(cart.dynamoClient, _tableCart);
 
             cart.context = new DynamoDBContext(cart.dynamoClient);
             return cart;
@@ -55,41 +53,11 @@ namespace MvcMusicStore.Models
         /// <returns></returns>
         public async Task AddToCart(Album album)
         {
-            var albumDocument = new Document();
-            albumDocument["AlbumId"] = album.AlbumId;
-            albumDocument["Title"] = album.Title;
-            albumDocument["Price"] = album.Price;
-            albumDocument["AlbumArtUrl"] = album.AlbumArtUrl;
-
-            var request = new UpdateItemRequest
-            {
-                TableName = _tableCart,
-                Key = new Dictionary<string, AttributeValue>
-                        {
-                            {"PK", new AttributeValue{S = this.ShoppingCartId } },
-                            {"SK", new AttributeValue{S = $"album#{album.AlbumId}" } }
-                        },
-                UpdateExpression = "ADD #count :increment SET #album = :album",
-
-                ExpressionAttributeNames = new Dictionary<string, string>
-                        {
-                            { "#count", COUNT_ATTRIBUTE},
-                            { "#album", ALBUM_ATTRIBUTE },
-                        },
-                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
-                        {
-                            {":increment", new AttributeValue{N = "1"}},
-                            {":album", new AttributeValue{M = albumDocument.ToAttributeMap()}}
-                        },
-                ReturnValues = ReturnValue.UPDATED_NEW
-            };
-
-            await dynamoClient.UpdateItemAsync(request);
+            await AddToCart(this.ShoppingCartId, album);
         }
 
         /// <summary>
-        /// Remove album from cart. Quantity provided will overwrite existing quantity for a specific product in cart, 
-        /// rather than adding to it.
+        /// Remove Album from cart or update the quanity.
         /// </summary>
         /// <returns></returns>
         public async Task<int> RemoveFromCart(Guid albumId, int count)
@@ -97,28 +65,7 @@ namespace MvcMusicStore.Models
             // if count is greater 0. then overwrite existing quantity for a specific product in cart.
             if (count > 0)
             {
-                var request = new UpdateItemRequest
-                {
-                    TableName = _tableCart,
-                    Key = new Dictionary<string, AttributeValue>
-                        {
-                            {"PK", new AttributeValue{S = this.ShoppingCartId } },
-                            {"SK", new AttributeValue{S = $"album#{albumId}" } }
-                        },
-                    UpdateExpression = "SET #count = :count",
-
-                    ExpressionAttributeNames = new Dictionary<string, string>
-                        {
-                            { "#count", COUNT_ATTRIBUTE}
-                        },
-                    ExpressionAttributeValues = new Dictionary<string, AttributeValue>
-                        {
-                            {":count", new AttributeValue{N = count.ToString()}},
-                        },
-                    ReturnValues = ReturnValue.UPDATED_NEW
-                };
-
-                await dynamoClient.UpdateItemAsync(request);
+                await UpdateCartCount(this.ShoppingCartId, albumId.ToString(), count);
             }
             else
             {
@@ -129,9 +76,14 @@ namespace MvcMusicStore.Models
             return count;
         }
 
-        public void EmptyCart()
+        public async Task EmptyCart(List<Cart> cartItems)
         {
-            context.Delete<string>(this.ShoppingCartId);
+            var cartBatch = context.CreateBatchWrite<Cart>();
+
+            // remove item from cart.
+            cartBatch.AddDeleteItems(cartItems);
+
+            await cartBatch.ExecuteAsync();
         }
 
         public List<Cart> GetCartItems()
@@ -160,7 +112,7 @@ namespace MvcMusicStore.Models
             return total ?? decimal.Zero;
         }
 
-        public Guid CreateOrder(Order order)
+        public async Task<Guid> CreateOrder(Order order)
         {
             decimal orderTotal = 0;
 
@@ -192,7 +144,7 @@ namespace MvcMusicStore.Models
             storeDB.SaveChanges();
 
             // Empty the shopping cart
-            EmptyCart();
+            await EmptyCart(cartItems);
 
             // Return the OrderId as the confirmation number
             return order.OrderId;
@@ -222,15 +174,96 @@ namespace MvcMusicStore.Models
 
         // When a user has logged in, migrate their shopping cart to
         // be associated with their username
-        public void MigrateCart(string userName)
+        public async Task MigrateCart(string userName)
         {
-            //var shoppingCart = storeDB.Carts.Where(c => c.CartId == ShoppingCartId);
+            List<Cart> cartItems = GetCartItems();
 
-            //foreach (Cart item in shoppingCart)
-            //{
-            //    item.CartId = userName;
-            //}
-            //storeDB.SaveChanges();
+            if (! cartItems.Any() )
+            {
+                return;
+            }
+
+            foreach (Cart cart in cartItems)
+            {
+                //if item already exist then update the quantity count, else add new item.
+                await AddToCart( $"user#{userName}", cart.Album, cart.Count);
+            }
+
+            // delete the items that were associated with temp id.
+            await EmptyCart(cartItems);
+        }
+
+        private async Task<int> UpdateCartCount(string cartId, string albumId, int count)
+        {
+            var request = new UpdateItemRequest
+            {
+                TableName = _tableCart,
+                Key = new Dictionary<string, AttributeValue>
+                        {
+                            {"PK", new AttributeValue{S = cartId } },
+                            {"SK", new AttributeValue{S = $"album#{albumId}" } }
+                        },
+                UpdateExpression = "SET #count = :count",
+
+                ExpressionAttributeNames = new Dictionary<string, string>
+                        {
+                            { "#count", COUNT_ATTRIBUTE}
+                        },
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                        {
+                            {":count", new AttributeValue{N = count.ToString()}},
+                        },
+                ReturnValues = ReturnValue.UPDATED_NEW
+            };
+
+            var response = await dynamoClient.UpdateItemAsync(request);
+
+            return count;
+        }
+
+
+        /// <summary>
+        /// If item exist in cart then update the quantity by provided value,
+        /// or add new item to cart.
+        /// </summary>
+        /// <param name="cartId"></param>
+        /// <param name="album"></param>
+        /// <param name="quantity"></param>
+        /// <returns></returns>
+        private async Task AddToCart(string cartId, Album album, int? quantity = null)
+        {
+            var albumDocument = new Document();
+            albumDocument["AlbumId"] = album.AlbumId;
+            albumDocument["Title"] = album.Title;
+            albumDocument["Price"] = album.Price;
+            albumDocument["AlbumArtUrl"] = album.AlbumArtUrl;
+
+            quantity = quantity ?? 1;
+
+            var request = new UpdateItemRequest
+            {
+                TableName = _tableCart,
+                Key = new Dictionary<string, AttributeValue>
+                        {
+                            {"PK", new AttributeValue{S = cartId } },
+                            {"SK", new AttributeValue{S = $"album#{album.AlbumId}" } }
+                        },
+                UpdateExpression = "ADD #count :increment SET #album = :album",
+
+                ExpressionAttributeNames = new Dictionary<string, string>
+                        {
+                            { "#count", COUNT_ATTRIBUTE},
+                            { "#album", ALBUM_ATTRIBUTE },
+                        },
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                        {
+                            {":increment", new AttributeValue{N = quantity.ToString()}},
+                            {":album", new AttributeValue{M = albumDocument.ToAttributeMap()}}
+                        },
+                ReturnValues = ReturnValue.UPDATED_NEW
+            };
+
+            await dynamoClient.UpdateItemAsync(request);
         }
     }
 }

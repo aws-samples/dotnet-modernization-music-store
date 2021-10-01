@@ -1,5 +1,6 @@
 ﻿using MvcMusicStore.Models;
 using System;
+using System.Threading.Tasks;
 using System.Web.Mvc;
 using System.Web.Security;
 
@@ -8,12 +9,12 @@ namespace MvcMusicStore.Controllers
     public class AccountController : Controller
     {
 
-        private void MigrateShoppingCart(string UserName)
+        private async Task MigrateShoppingCart(string UserName)
         {
             // Associate shopping cart items with logged-in user
             var cart = ShoppingCart.GetCart(this.HttpContext);
 
-            cart.MigrateCart(UserName);
+            await cart.MigrateCart(UserName);
             Session[ShoppingCart.CartSessionKey] = UserName;
         }
 
@@ -29,13 +30,13 @@ namespace MvcMusicStore.Controllers
         // POST: /Account/LogOn
 
         [HttpPost]
-        public ActionResult LogOn(LogOnModel model, string returnUrl)
+        public async Task<ActionResult> LogOn(LogOnModel model, string returnUrl)
         {
             if (ModelState.IsValid)
             {
                 if (Membership.ValidateUser(model.UserName, model.Password))
                 {
-                    MigrateShoppingCart(model.UserName);
+                    await MigrateShoppingCart(model.UserName);
 
                     FormsAuthentication.SetAuthCookie(model.UserName, model.RememberMe);
                     if (Url.IsLocalUrl(returnUrl) && returnUrl.Length > 1 && returnUrl.StartsWith("/")

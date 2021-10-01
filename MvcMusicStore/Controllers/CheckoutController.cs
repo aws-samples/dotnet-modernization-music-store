@@ -1,6 +1,7 @@
 ﻿using MvcMusicStore.Models;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web.Mvc;
 
 namespace MvcMusicStore.Controllers
@@ -23,7 +24,7 @@ namespace MvcMusicStore.Controllers
         // POST: /Checkout/AddressAndPayment
 
         [HttpPost]
-        public ActionResult AddressAndPayment(FormCollection values)
+        public async Task<ActionResult> AddressAndPayment(FormCollection values)
         {
             var order = new Order() { OrderId = Guid.NewGuid() };
             TryUpdateModel(order);
@@ -46,7 +47,7 @@ namespace MvcMusicStore.Controllers
 
                     //Process the order
                     var cart = ShoppingCart.GetCart(this.HttpContext);
-                    cart.CreateOrder(order);
+                    await cart.CreateOrder(order);
 
                     return RedirectToAction("Complete",
                         new { id = order.OrderId });
