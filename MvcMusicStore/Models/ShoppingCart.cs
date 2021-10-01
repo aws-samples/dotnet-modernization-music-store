@@ -1,5 +1,6 @@
 ﻿using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
+using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
 using Newtonsoft.Json;
 using System;
@@ -14,16 +15,17 @@ namespace MvcMusicStore.Models
     public partial class ShoppingCart
     {
 
-        const string COUNT_ATTRIBUTE = "count";
-        const string ALBUM_ATTRIBUTE = "albumDetail";
+        const string COUNT_ATTRIBUTE = "Count";
+        const string ALBUM_ATTRIBUTE = "Album";
 
         private AmazonDynamoDBClient dynamoClient;
         private DynamoDBContext context;
+        private Table dynamoDbCartTable;
 
         string ShoppingCartId { get; set; }
 
         public const string CartSessionKey = "CartId";
-        string _tableGallery = "Cart";
+        private const string _tableCart = "Cart";
 
         MusicStoreEntities storeDB = new MusicStoreEntities();
 
@@ -34,6 +36,8 @@ namespace MvcMusicStore.Models
 
             // set DynamoDB Context.
             cart.dynamoClient = new AmazonDynamoDBClient();
+            cart.dynamoDbCartTable = Table.LoadTable(cart.dynamoClient, _tableCart);
+
             cart.context = new DynamoDBContext(cart.dynamoClient);
             return cart;
         }
@@ -44,28 +48,38 @@ namespace MvcMusicStore.Models
             return GetCart(controller.HttpContext);
         }
 
+        /// <summary>
+        /// use updateItem to implement an atomic counter
+        /// </summary>
+        /// <param name="album"></param>
+        /// <returns></returns>
         public async Task AddToCart(Album album)
         {
+            var albumDocument = new Document();
+            albumDocument["AlbumId"] = album.AlbumId;
+            albumDocument["Title"] = album.Title;
+            albumDocument["Price"] = album.Price;
+            albumDocument["AlbumArtUrl"] = album.AlbumArtUrl;
 
             var request = new UpdateItemRequest
             {
-                TableName = _tableGallery,
+                TableName = _tableCart,
                 Key = new Dictionary<string, AttributeValue>
                         {
-                            {"cartId", new AttributeValue{S = this.ShoppingCartId } },
-                            {"albumId", new AttributeValue{S = $"album#{album.AlbumId}" } }
+                            {"PK", new AttributeValue{S = this.ShoppingCartId } },
+                            {"SK", new AttributeValue{S = $"album#{album.AlbumId}" } }
                         },
-                UpdateExpression = "ADD #count :increment SET #albumDetail = :albumDetail",
+                UpdateExpression = "ADD #count :increment SET #album = :album",
 
                 ExpressionAttributeNames = new Dictionary<string, string>
                         {
                             { "#count", COUNT_ATTRIBUTE},
-                            { "#albumDetail", ALBUM_ATTRIBUTE },
+                            { "#album", ALBUM_ATTRIBUTE },
                         },
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                         {
                             {":increment", new AttributeValue{N = "1"}},
-                            {":albumDetail", new AttributeValue{S = JsonConvert.SerializeObject(album)}}
+                            {":album", new AttributeValue{M = albumDocument.ToAttributeMap()}}
                         },
                 ReturnValues = ReturnValue.UPDATED_NEW
             };
@@ -85,13 +99,13 @@ namespace MvcMusicStore.Models
             {
                 var request = new UpdateItemRequest
                 {
-                    TableName = _tableGallery,
+                    TableName = _tableCart,
                     Key = new Dictionary<string, AttributeValue>
                         {
-                            {"cartId", new AttributeValue{S = this.ShoppingCartId } },
-                            {"albumId", new AttributeValue{S = $"album#{albumId}" } }
+                            {"PK", new AttributeValue{S = this.ShoppingCartId } },
+                            {"SK", new AttributeValue{S = $"album#{albumId}" } }
                         },
-                    UpdateExpression = "SET #count :count",
+                    UpdateExpression = "SET #count = :count",
 
                     ExpressionAttributeNames = new Dictionary<string, string>
                         {
@@ -109,7 +123,7 @@ namespace MvcMusicStore.Models
             else
             {
                 // remove item from cart.
-                context.Delete<string>(this.ShoppingCartId, rangeKey: $"album#{albumId}");
+                await context.DeleteAsync<Cart>(this.ShoppingCartId, rangeKey: $"album#{albumId}");
             }
 
             return count;
@@ -191,7 +205,7 @@ namespace MvcMusicStore.Models
             {
                 if (!string.IsNullOrWhiteSpace(context.User.Identity.Name))
                 {
-                    context.Session[CartSessionKey] = context.User.Identity.Name;
+                    context.Session[CartSessionKey] = $"user#{context.User.Identity.Name}";
                 }
                 else
                 {
@@ -199,7 +213,7 @@ namespace MvcMusicStore.Models
                     Guid tempCartId = Guid.NewGuid();
 
                     // Send tempCartId back to client as a cookie
-                    context.Session[CartSessionKey] = tempCartId.ToString();
+                    context.Session[CartSessionKey] = $"cart#{tempCartId.ToString()}";
                 }
             }
 

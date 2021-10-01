@@ -12,7 +12,7 @@ namespace MvcMusicStore.Models
         [DynamoDBHashKey("PK")]
         public string CartId { get; set; }
 
-        [DynamoDBHashKey("SK")]
+        [DynamoDBRangeKey("SK")]
         public string AlbumId
         {
             get {

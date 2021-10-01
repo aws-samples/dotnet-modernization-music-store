@@ -9,7 +9,7 @@
         $(".RemoveLink").click(function () {
             // Get the id from the link
             var recordToDelete = $(this).attr("data-id");
-            var quantityLeft = parseInt($(this).attr("data-count")) - 1
+            var quantityLeft = parseInt($('#item-count-' + recordToDelete).text()) - 1
             if (recordToDelete != '') {
 
                 // Perform the ajax post
@@ -80,7 +80,7 @@
             <td>
                 @item.Album.Price
             </td>
-            <td id="item-count-@item.AlbumId">
+            <td id="item-count-@item.AlbumId" data-count="@item.Count">
                 @item.Count
             </td>
             <td>
