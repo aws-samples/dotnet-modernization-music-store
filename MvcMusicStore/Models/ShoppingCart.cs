@@ -107,27 +107,42 @@ cart => cart.CartId == ShoppingCartId
 
         public int GetCount()
         {
-            // Get the count of each item in the cart and sum them up
-            var q = from cartItems in storeDB.Carts
-                              where cartItems.CartId == this.ShoppingCartId
-                              select (decimal?)cartItems.Count;
+            var lineItemsQ = from cartItems in storeDB.Carts
+                             where cartItems.CartId == this.ShoppingCartId
+                             select new { Key = cartItems.CartId, ItemCount = (int?)cartItems.Count };
+
+            var q = from li in lineItemsQ
+                    group li by li.Key into g
+                    select g.Sum(i => (decimal)i.ItemCount); // Casting count to decimal is an undesireable but ultimately safe workaround.
+
             Debug.WriteLine($"Getting cart item count query:\n{q}");
 
             // Return 0 if all entries are null
-            return (int?)q.Sum() ?? 0;
+            return (int)q.SingleOrDefault();
+        }
+
+        /// <summary>
+        /// Removes trailing zeros from a decimal
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static decimal Normalize(decimal value)
+        {
+            return value / 1.000000000000000000000000000000000m;
         }
 
         public decimal GetTotal()
         {
-            // Multiply album price by count of that album to get 
-            // the current price for each of those albums in the cart
-            // sum all album price totals to get the cart total
-            var q = from cartItems in storeDB.Carts
-                              where cartItems.CartId == this.ShoppingCartId
-                              select cartItems.Count * (double?)cartItems.Album.Price;
-            Debug.WriteLine($"Getting cart total amount query:\n{q}");
+            var lineItemsQ = from cartItems in storeDB.Carts
+                             where cartItems.CartId == ShoppingCartId
+                             select new { Key = cartItems.CartId, ItemTotal = cartItems.Count * cartItems.Album.Price };
 
-            return (decimal?)q.Sum() ?? decimal.Zero;
+            var q = from li in lineItemsQ
+                    group li by li.Key into g
+                    select g.Sum(i => i.ItemTotal);
+
+            Debug.WriteLine($"Getting cart total amount query:\n{q}");
+            return Normalize(q.SingleOrDefault()); // Trailing zeros could be an indication of something undesirable going on in decimal math, but hopefully not.
         }
 
         public Guid CreateOrder(Order order)
