@@ -9,7 +9,8 @@ namespace MvcMusicStore.Models
 {
     public partial class ShoppingCart
     {
-        MusicStoreEntities storeDB = new MusicStoreEntities();
+        readonly MusicStoreEntities storeDB = new MusicStoreEntities();
+        readonly PostgresMusicStoreContext orderDb = new PostgresMusicStoreContext();
 
         string ShoppingCartId { get; set; }
 
@@ -166,7 +167,7 @@ cart => cart.CartId == ShoppingCartId
                 // Set the order total of the shopping cart
                 orderTotal += (item.Count * item.Album.Price);
 
-                storeDB.OrderDetails.Add(orderDetail);
+                orderDb.OrderDetails.Add(orderDetail);
 
             }
 
