@@ -14,17 +14,15 @@ namespace MvcMusicStore.Models
 {
     public partial class ShoppingCart
     {
-
-        const string COUNT_ATTRIBUTE = "Count";
-        const string ALBUM_ATTRIBUTE = "Album";
-
         private AmazonDynamoDBClient dynamoClient;
         private DynamoDBContext context;
 
         string ShoppingCartId { get; set; }
 
-        public const string CartSessionKey = "CartId";
-        private const string _tableCart = "Cart";
+        private const string CART_SESSION_KEY = "CartId";
+        private const string TABLE_CART = "Cart";
+        private const string COUNT_ATTRIBUTE = "Count";
+        private const string ALBUM_ATTRIBUTE = "Album";
 
         MusicStoreEntities storeDB = new MusicStoreEntities();
 
@@ -60,12 +58,12 @@ namespace MvcMusicStore.Models
         /// Remove Album from cart or update the quanity.
         /// </summary>
         /// <returns></returns>
-        public async Task<int> RemoveFromCart(Guid albumId, int count)
+        public async Task<int> RemoveFromCart(Guid albumId, int quantity)
         {
-            // if count is greater 0. then overwrite existing quantity for a specific product in cart.
-            if (count > 0)
+            // if quantity is greater 0, then update quantity in cart with passed quantity.
+            if (quantity > 0)
             {
-                await UpdateCartCount(this.ShoppingCartId, albumId.ToString(), count);
+                await UpdateCartCount(this.ShoppingCartId, albumId.ToString(), quantity);
             }
             else
             {
@@ -73,17 +71,17 @@ namespace MvcMusicStore.Models
                 await context.DeleteAsync<Cart>(this.ShoppingCartId, rangeKey: $"album#{albumId}");
             }
 
-            return count;
+            return quantity;
         }
 
-        public async Task EmptyCart(List<Cart> cartItems)
+        public void EmptyCart(List<Cart> cartItems)
         {
+            // remove multiple items from cart.
             var cartBatch = context.CreateBatchWrite<Cart>();
-
-            // remove item from cart.
+            
             cartBatch.AddDeleteItems(cartItems);
 
-            await cartBatch.ExecuteAsync();
+            cartBatch.Execute();
         }
 
         public List<Cart> GetCartItems()
@@ -144,7 +142,7 @@ namespace MvcMusicStore.Models
             storeDB.SaveChanges();
 
             // Empty the shopping cart
-            await EmptyCart(cartItems);
+            EmptyCart(cartItems);
 
             // Return the OrderId as the confirmation number
             return order.OrderId;
@@ -153,27 +151,37 @@ namespace MvcMusicStore.Models
         // We're using HttpContextBase to allow access to cookies.
         public string GetCartId(HttpContextBase context)
         {
-            if (context.Session[CartSessionKey] == null)
+            if (context.Session[CART_SESSION_KEY] == null)
             {
                 if (!string.IsNullOrWhiteSpace(context.User.Identity.Name))
                 {
-                    context.Session[CartSessionKey] = $"user#{context.User.Identity.Name}";
+                    SetCartId(context, context.User.Identity.Name);
                 }
                 else
                 {
-                    // Generate a new random GUID using System.Guid class
-                    Guid tempCartId = Guid.NewGuid();
-
-                    // Send tempCartId back to client as a cookie
-                    context.Session[CartSessionKey] = $"cart#{tempCartId.ToString()}";
+                    SetUnAuthenticatedCartId(context);
                 }
             }
 
-            return context.Session[CartSessionKey].ToString();
+            return context.Session[CART_SESSION_KEY].ToString();
         }
 
-        // When a user has logged in, migrate their shopping cart to
-        // be associated with their username
+        public void SetCartId(HttpContextBase context, string userName)
+        {
+            context.Session[CART_SESSION_KEY] = $"user#{userName}";
+        }
+
+        public void SetUnAuthenticatedCartId(HttpContextBase context)
+        {
+            // Generate a new random GUID using System.Guid class
+            Guid tempCartId = Guid.NewGuid();
+
+            // Send tempCartId back to client as a cookie
+            context.Session[CART_SESSION_KEY] = $"cart#{tempCartId.ToString()}";
+        }
+
+
+        // When user logs in, migrate their shopping cart to their username.
         public async Task MigrateCart(string userName)
         {
             List<Cart> cartItems = GetCartItems();
@@ -185,19 +193,19 @@ namespace MvcMusicStore.Models
 
             foreach (Cart cart in cartItems)
             {
-                //if item already exist then update the quantity count, else add new item.
+                //if item already exist in Cart, then update the quantity, else add new item.
                 await AddToCart( $"user#{userName}", cart.Album, cart.Count);
             }
 
             // delete the items that were associated with temp id.
-            await EmptyCart(cartItems);
+            EmptyCart(cartItems);
         }
 
         private async Task<int> UpdateCartCount(string cartId, string albumId, int count)
         {
             var request = new UpdateItemRequest
             {
-                TableName = _tableCart,
+                TableName = TABLE_CART,
                 Key = new Dictionary<string, AttributeValue>
                         {
                             {"PK", new AttributeValue{S = cartId } },
@@ -242,7 +250,7 @@ namespace MvcMusicStore.Models
 
             var request = new UpdateItemRequest
             {
-                TableName = _tableCart,
+                TableName = TABLE_CART,
                 Key = new Dictionary<string, AttributeValue>
                         {
                             {"PK", new AttributeValue{S = cartId } },

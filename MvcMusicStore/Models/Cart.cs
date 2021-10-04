@@ -7,23 +7,20 @@ namespace MvcMusicStore.Models
     [DynamoDBTable("Cart")]
     public class Cart
     {
-        private string _albumId;
-
         [DynamoDBHashKey("PK")]
         public string CartId { get; set; }
 
         [DynamoDBRangeKey("SK")]
-        public string AlbumId
+        public string SortKey { get; set; }
+
+        public Guid AlbumId
         {
-            get {
-                return _albumId.Replace("album#", "");
-            }
-            set
+            get
             {
-                _albumId = value.ToString();
+                return Guid.Parse(SortKey.Replace("album#", ""));
             }
         }
-        
+
         public int Count { get; set; }
         
         public System.DateTime DateCreated { get; set; }

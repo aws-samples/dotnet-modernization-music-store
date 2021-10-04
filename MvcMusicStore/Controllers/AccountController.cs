@@ -15,7 +15,7 @@ namespace MvcMusicStore.Controllers
             var cart = ShoppingCart.GetCart(this.HttpContext);
 
             await cart.MigrateCart(UserName);
-            Session[ShoppingCart.CartSessionKey] = UserName;
+            cart.SetCartId(this.HttpContext, UserName);
         }
 
         //
@@ -36,9 +36,10 @@ namespace MvcMusicStore.Controllers
             {
                 if (Membership.ValidateUser(model.UserName, model.Password))
                 {
-                    await MigrateShoppingCart(model.UserName);
-
                     FormsAuthentication.SetAuthCookie(model.UserName, model.RememberMe);
+                    
+                    await MigrateShoppingCart(model.UserName);
+                    
                     if (Url.IsLocalUrl(returnUrl) && returnUrl.Length > 1 && returnUrl.StartsWith("/")
                         && !returnUrl.StartsWith("//") && !returnUrl.StartsWith("/\\"))
                     {
@@ -83,7 +84,7 @@ namespace MvcMusicStore.Controllers
         // POST: /Account/Register
 
         [HttpPost]
-        public ActionResult Register(RegisterModel model)
+        public async Task<ActionResult> Register(RegisterModel model)
         {
             if (ModelState.IsValid)
             {
@@ -93,7 +94,7 @@ namespace MvcMusicStore.Controllers
 
                 if (createStatus == MembershipCreateStatus.Success)
                 {
-                    MigrateShoppingCart(model.UserName);
+                    await MigrateShoppingCart(model.UserName);
 
                     FormsAuthentication.SetAuthCookie(model.UserName, false /* createPersistentCookie */);
                     return RedirectToAction("Index", "Home");
