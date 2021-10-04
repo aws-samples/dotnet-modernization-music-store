@@ -15,7 +15,7 @@ namespace MvcMusicStore.Controllers
             var cart = ShoppingCart.GetCart(this.HttpContext);
 
             await cart.MigrateCart(UserName);
-            cart.SetCartId(this.HttpContext, UserName);
+            cart.SetAuthenticatedCartId(this.HttpContext, UserName);
         }
 
         //

@@ -1,0 +1,52 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Transform": "AWS::Serverless-2016-10-31",
+  "Description": "An AWS Serverless Application.",
+  "Parameters": {
+    "SubnetA": {
+            "Type": "AWS::SSM::Parameter::Value<String>",
+            "Default": "/MusicStore/SubnetA"
+        },
+    "RDSEndpoint": {
+            "Type": "AWS::SSM::Parameter::Value<String>",
+            "Default": "/MusicStore/RDSEndpoint"
+        },
+    "RdsCredentialsSecretName": {
+            "Type": "AWS::SSM::Parameter::Value<String>",
+            "Default": "/MusicStore/RdsCredentialsSecretName"
+        }
+  },
+  "Resources": {
+        "CartItemStreamProcessorFunction": {
+            "Type": "AWS::Serverless::Function",
+            "Description": "Defines a serverless function for Lamba using the .NET Core runtime.",
+            "Properties": {
+                "PackageType": "Image",
+                "ImageConfig": { "Command": [ "CartItemStreamProcessor::CartItemStreamProcessor.Function::FunctionHandler" ]},
+                "ImageUri": ".",
+                "MemorySize": 256,
+                "Timeout": 30,
+                "Role": null,
+                "Policies": [
+                    "AWSLambdaFullAccess"
+                ],
+                 "Environment": {
+                    "Variables": {
+                        "RDS_ENDPOINT": {"Ref": "RDSEndpoint"},
+                        "RDS_SECRET_ARN": {"Ref": "RdsCredentialsSecretName"}
+                    }
+                },
+                "Tracing": "Active",
+                "Events": {},
+                "VpcConfig":{
+                    "SubnetIds" : [ {"Ref": "SubnetA"} ]
+                }
+            },
+            "Metadata": {
+                "Dockerfile": "Dockerfile",
+                "DockerContext": ".",
+                "DockerTag": ""
+            }
+        }
+    }
+}

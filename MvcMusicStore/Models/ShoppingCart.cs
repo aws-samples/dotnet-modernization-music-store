@@ -74,19 +74,19 @@ namespace MvcMusicStore.Models
             return quantity;
         }
 
-        public void EmptyCart(List<Cart> cartItems)
+        public async Task EmptyCart(List<Cart> cartItems)
         {
             // remove multiple items from cart.
             var cartBatch = context.CreateBatchWrite<Cart>();
             
             cartBatch.AddDeleteItems(cartItems);
 
-            cartBatch.Execute();
+            await cartBatch.ExecuteAsync();
         }
 
         public List<Cart> GetCartItems()
         {
-            var cartItems = context.Query<Cart>(this.ShoppingCartId, Amazon.DynamoDBv2.DocumentModel.QueryOperator.BeginsWith, "album");
+            var cartItems = context.Query<Cart>(this.ShoppingCartId, QueryOperator.BeginsWith, "album");
 
             return cartItems.ToList();
         }
@@ -142,7 +142,7 @@ namespace MvcMusicStore.Models
             storeDB.SaveChanges();
 
             // Empty the shopping cart
-            EmptyCart(cartItems);
+            await EmptyCart(cartItems);
 
             // Return the OrderId as the confirmation number
             return order.OrderId;
@@ -155,7 +155,7 @@ namespace MvcMusicStore.Models
             {
                 if (!string.IsNullOrWhiteSpace(context.User.Identity.Name))
                 {
-                    SetCartId(context, context.User.Identity.Name);
+                    SetAuthenticatedCartId(context, context.User.Identity.Name);
                 }
                 else
                 {
@@ -166,7 +166,7 @@ namespace MvcMusicStore.Models
             return context.Session[CART_SESSION_KEY].ToString();
         }
 
-        public void SetCartId(HttpContextBase context, string userName)
+        public void SetAuthenticatedCartId(HttpContextBase context, string userName)
         {
             context.Session[CART_SESSION_KEY] = $"user#{userName}";
         }
@@ -198,7 +198,7 @@ namespace MvcMusicStore.Models
             }
 
             // delete the items that were associated with temp id.
-            EmptyCart(cartItems);
+            await EmptyCart(cartItems);
         }
 
         private async Task<int> UpdateCartCount(string cartId, string albumId, int count)
@@ -256,7 +256,7 @@ namespace MvcMusicStore.Models
                             {"PK", new AttributeValue{S = cartId } },
                             {"SK", new AttributeValue{S = $"album#{album.AlbumId}" } }
                         },
-                UpdateExpression = "ADD #count :increment SET #album = :album",
+                UpdateExpression = "ADD #count :increment, SET #album = :album",
 
                 ExpressionAttributeNames = new Dictionary<string, string>
                         {
