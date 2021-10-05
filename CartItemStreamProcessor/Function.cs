@@ -30,24 +30,34 @@ namespace CartItemStreamProcessor
         /// </summary>
         public Function()
         {
-            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("LAMBDA_TASK_ROOT")))
+            try
             {
-                Amazon.XRay.Recorder.Handlers.AwsSdk.AWSSDKHandler.RegisterXRayForAllServices();
+                Console.WriteLine("getting connection string");
+                string connectionString = GetSecureDBConnectionString();
+                storeDB = new MusicStoreEntities(connectionString);
             }
-
-            string connectionString = GetSecureDBConnectionString();
-
-            storeDB = new MusicStoreEntities(connectionString);
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
 
         private string GetSecureDBConnectionString()
         {
             var secretRequest = new GetSecretValueRequest { SecretId = Environment.GetEnvironmentVariable(RDS_CRED_SECRET_ARN) };
-
             var secretsManagerClient = new AmazonSecretsManagerClient();
-            var secretResponse = Task.Run(async () => await secretsManagerClient.GetSecretValueAsync(secretRequest)).Result;
-            var secretCredetials = JsonConvert.DeserializeObject<SecretCredentials>(secretResponse.SecretString);
+            GetSecretValueResponse response = null;
+            
+            try
+            {
+                response = Task.Run(async () => await secretsManagerClient.GetSecretValueAsync(secretRequest)).Result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
 
+            var secretCredetials = JsonConvert.DeserializeObject<SecretCredentials>(response.SecretString);
             var serverAddress = Environment.GetEnvironmentVariable(RDS_ENDPOINT);
 
             return $"Server={serverAddress}; Database=MusicStore; User Id={secretCredetials.userName}; Password={secretCredetials.password}";
@@ -65,8 +75,8 @@ namespace CartItemStreamProcessor
             var batchIncrements = new Dictionary<(string CartId, string AlbumId), int>();
             foreach (var record in dynamoEvent.Records)
             {
-                var cartId = record.Dynamodb.Keys["CartId"].S;
-                var albumId = record.Dynamodb.Keys["AlbumId"].S;
+                var cartId = record.Dynamodb.Keys["PK"].S;
+                var albumId = record.Dynamodb.Keys["SK"].S;
 
                 var batchKey = (CartId: cartId, AlbumId: albumId);
 
@@ -99,15 +109,15 @@ namespace CartItemStreamProcessor
 
                     if (kvp.Value > 0)
                     {
-                        await AddToCart(kvp.Key.CartId, Guid.Parse(kvp.Key.AlbumId.Replace("album#", "")), kvp.Value);
+                        await AddToCart(kvp.Key.CartId.Replace("user#", "").Replace("cart#",""), Guid.Parse(kvp.Key.AlbumId.Replace("album#", "")), kvp.Value);
                     }
                     else { 
-                        await RemoveFromCart(kvp.Key.CartId, Guid.Parse(kvp.Key.AlbumId.Replace("album#", "")), kvp.Value);
+                        await RemoveFromCart(kvp.Key.CartId.Replace("user#", "").Replace("cart#", ""), Guid.Parse(kvp.Key.AlbumId.Replace("album#", "")), kvp.Value);
                     }
                 }
                 catch (Exception e)
                 {
-                    context.Logger.LogLine($"Failed to update {kvp.Key.CartId} from user {kvp.Key.AlbumId} by increment {kvp.Value}: {e.Message}");
+                    context.Logger.LogLine($"Failed to update {kvp.Key.CartId} from user {kvp.Key.AlbumId} by increment {kvp.Value}: {e.Message}. Exception {e}");
                 }
             }
 

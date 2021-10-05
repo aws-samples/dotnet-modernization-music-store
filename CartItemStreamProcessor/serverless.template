@@ -14,9 +14,45 @@
     "RdsCredentialsSecretName": {
             "Type": "AWS::SSM::Parameter::Value<String>",
             "Default": "/MusicStore/RdsCredentialsSecretName"
+        },
+    "LambdaSecurityGroup": {
+            "Type": "AWS::SSM::Parameter::Value<String>",
+            "Default": "/MusicStore/LambdaSecurityGroup"
         }
   },
   "Resources": {
+        "LambdaRole": {
+            "Type": "AWS::IAM::Role",
+            "Description" : "",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "lambda.amazonaws.com"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "ManagedPolicyArns": [
+				    "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole",
+                    "arn:aws:iam::aws:policy/AWSLambdaInvocation-DynamoDB"
+                ],
+                "Policies" : [
+					
+			    ]
+            }
+        },
+
+
+
         "CartItemStreamProcessorFunction": {
             "Type": "AWS::Serverless::Function",
             "Description": "Defines a serverless function for Lamba using the .NET Core runtime.",
@@ -26,10 +62,12 @@
                 "ImageUri": ".",
                 "MemorySize": 256,
                 "Timeout": 30,
-                "Role": null,
-                "Policies": [
-                    "AWSLambdaFullAccess"
-                ],
+                "Role": {
+                    "Fn::GetAtt": [
+                        "LambdaRole",
+                        "Arn"
+                    ]
+                },
                  "Environment": {
                     "Variables": {
                         "RDS_ENDPOINT": {"Ref": "RDSEndpoint"},
@@ -39,7 +77,8 @@
                 "Tracing": "Active",
                 "Events": {},
                 "VpcConfig":{
-                    "SubnetIds" : [ {"Ref": "SubnetA"} ]
+                    "SubnetIds" : [ {"Ref": "SubnetA"} ],
+                    "SecurityGroupIds" : [ {"Ref": "LambdaSecurityGroup"} ]
                 }
             },
             "Metadata": {

@@ -256,7 +256,7 @@ namespace MvcMusicStore.Models
                             {"PK", new AttributeValue{S = cartId } },
                             {"SK", new AttributeValue{S = $"album#{album.AlbumId}" } }
                         },
-                UpdateExpression = "ADD #count :increment, SET #album = :album",
+                UpdateExpression = "ADD #count :increment SET #album = :album",
 
                 ExpressionAttributeNames = new Dictionary<string, string>
                         {

@@ -12,7 +12,7 @@
     "configuration" : "Release",
     "s3-prefix"     : "CartItemStreamProcessor/",
     "template"      : "serverless.template",
-    "template-parameters" : "\"SubnetA\"=\"/MusicStore/SubnetA\";\"RDSEndpoint\"=\"/MusicStore/RDSEndpoint\";\"RdsCredentialsSecretName\"=\"/MusicStore/RdsCredentialsSecretName\"",
+    "template-parameters" : "\"SubnetA\"=\"/MusicStore/SubnetA\";\"RDSEndpoint\"=\"/MusicStore/RDSEndpoint\";\"RdsCredentialsSecretName\"=\"/MusicStore/RdsCredentialsSecretName\";\"LambdaSecurityGroup\"=\"/MusicStore/LambdaSecurityGroup\"",
     "docker-host-build-output-dir" : "./bin/Release/lambda-publish",
     "image-command"                : "CartItemStreamProcessor::CartItemStreamProcessor.Function::FunctionHandler",
     "s3-bucket"                    : "cf-templates-1nwnfk45273my-us-east-1",
