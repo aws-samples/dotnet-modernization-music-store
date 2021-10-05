@@ -33,7 +33,7 @@
                  "Environment": {
                     "Variables": {
                         "RDS_ENDPOINT": {"Ref": "RDSEndpoint"},
-                        "RDS_SECRET_ARN": {"Ref": "RdsCredentialsSecretName"}
+                        "RDS_CRED_SECRET_ARN": {"Ref": "RdsCredentialsSecretName"}
                     }
                 },
                 "Tracing": "Active",

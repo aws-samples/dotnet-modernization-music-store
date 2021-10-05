@@ -19,23 +19,29 @@ using Newtonsoft.Json;
 
 namespace CartItemStreamProcessor
 {
-    public class Functions
+    public class Function
     {
         private readonly MusicStoreEntities storeDB;
         private const string RDS_ENDPOINT = "RDS_ENDPOINT";
-        private const string RDS_CRED_SECRET_ARN = "RDS_SECRET_ARN";
+        private const string RDS_CRED_SECRET_ARN = "RDS_CRED_SECRET_ARN";
 
         /// <summary>
         /// Default constructor that Lambda will invoke.
         /// </summary>
-        public Functions()
+        public Function()
         {
             if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("LAMBDA_TASK_ROOT")))
             {
                 Amazon.XRay.Recorder.Handlers.AwsSdk.AWSSDKHandler.RegisterXRayForAllServices();
             }
 
-            
+            string connectionString = GetSecureDBConnectionString();
+
+            storeDB = new MusicStoreEntities(connectionString);
+        }
+
+        private string GetSecureDBConnectionString()
+        {
             var secretRequest = new GetSecretValueRequest { SecretId = Environment.GetEnvironmentVariable(RDS_CRED_SECRET_ARN) };
 
             var secretsManagerClient = new AmazonSecretsManagerClient();
@@ -44,13 +50,8 @@ namespace CartItemStreamProcessor
 
             var serverAddress = Environment.GetEnvironmentVariable(RDS_ENDPOINT);
 
-            string connectionString = FormatConnectionString(serverAddress, "MusicStore", secretCredetials.password);
-
-            storeDB = new MusicStoreEntities(connectionString);
+            return $"Server={serverAddress}; Database=MusicStore; User Id={secretCredetials.userName}; Password={secretCredetials.password}";
         }
-
-        private string FormatConnectionString(string serverAddress, string dbName, object dbPassword) =>
-            $"Server={serverAddress}; Database={dbName}; User Id=Administrator; Password={dbPassword}";
 
         /// <summary>
         /// A Lambda function to respond to HTTP Get methods from API Gateway

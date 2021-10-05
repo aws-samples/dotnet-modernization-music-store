@@ -4,7 +4,11 @@
       "commandName": "Executable",
       "commandLineArgs": "--port 5050",
       "workingDirectory": ".\\bin\\$(Configuration)\\net5.0",
-      "executablePath": "%USERPROFILE%\\.dotnet\\tools\\dotnet-lambda-test-tool-5.0.exe"
+      "executablePath": "%USERPROFILE%\\.dotnet\\tools\\dotnet-lambda-test-tool-5.0.exe",
+      "environmentVariables": {
+        "RDS_ENDPOINT": "music-store-sql-server.c0b0tjrhk4fs.us-east-1.rds.amazonaws.com",
+        "RDS_SECRET_ARN": "arn:aws:secretsmanager:us-east-1:418699140217:secret:RdsCredentials-RK82LCrqViR5-t73qcN"
+      }
     }
   }
 }
