@@ -6,7 +6,7 @@
         "dotnet lambda help",
         "All the command line options for the Lambda command can be specified in this file."
     ],
-    "profile"     : "default-sanjay",
+    "profile"     : "default",
     "region"      : "us-east-1",
     "package-type" : "image",
     "configuration" : "Release",

@@ -10,6 +10,15 @@ namespace MvcMusicStore.Models
         {
         }
         public DbSet<Cart> Carts { get; set; }
+
+
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            Database.SetInitializer<MusicStoreEntities>(null);
+
+            base.OnModelCreating(modelBuilder);
+        }
+
     }
 
     public class CodeConfig : DbConfiguration

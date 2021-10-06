@@ -60,7 +60,6 @@ namespace CartItemStreamProcessor
             {
                 var cartId = RDSCartId(record.Dynamodb.Keys["PK"].S);
                 var albumId = RDSAlbumId(record.Dynamodb.Keys["SK"].S);
-                var quatity = record.Dynamodb.NewImage["Count"].N;
 
                 var batchKey = (CartId: cartId, AlbumId: albumId);
 
@@ -72,6 +71,7 @@ namespace CartItemStreamProcessor
                 if (record.EventName == OperationType.INSERT
                     || record.EventName == OperationType.MODIFY)
                 {
+                    var quatity = record.Dynamodb.NewImage["Count"]?.N;
                     batchIncrements[batchKey] = int.Parse(quatity);
                 }
                 else if (record.EventName == OperationType.REMOVE)
@@ -84,23 +84,40 @@ namespace CartItemStreamProcessor
                 }
             }
 
+            List<Cart> cartItems = null;
+
             context.Logger.LogLine($"Aggregated dynamodb events to {batchIncrements.Count} records...");
 
-            // Fetch multiple cart items from SQL Server based on CartId and AlbumId
-            var cartItems = storeDB.Carts.Where(c => batchIncrements.Keys.Any(k => k.CartId == c.CartId && k.AlbumId == c.AlbumId)).ToList();
+            List<string> cartIds = batchIncrements.Keys.Select(k => k.CartId).ToList();
+            List<Guid> albumdIds = batchIncrements.Keys.Select(k => k.AlbumId).ToList();
 
-            context.Logger.LogLine($"Fetched multiple CartItems from Sql Server");
+            try
+            {
+                // Fetch multiple cart items from SQL Server based on CartId and AlbumId
+                cartItems = storeDB.Carts.Where(c => cartIds.Contains(c.CartId) && albumdIds.Contains(c.AlbumId)).ToList();
+
+                context.Logger.LogLine($"Fetched CartItems from Sql Server");
+            }
+            catch (Exception e)
+            {
+                context.Logger.LogLine($"Failed to fetch cart items from Sql Server for cartIds: {string.Join(',', cartIds)}. Exception {e}");
+            }
 
             foreach (var kvp in batchIncrements)
             {
                 // check if cart items exist in SQL Server database.
                 var cartItem = cartItems.FirstOrDefault(c => c.CartId == kvp.Key.CartId && c.AlbumId == kvp.Key.AlbumId);
 
-                if (cartItem == null && kvp.Value > 0)
+                if (cartItem == null)
                 {
+                    // no modification to cart item.
+                    if (kvp.Value == 0)
+                        continue;
+
                     // Create a new cart item if no cart item exists
                     cartItem = new Cart
                     {
+                        RecordId = Guid.NewGuid(),
                         AlbumId = kvp.Key.AlbumId,
                         CartId = kvp.Key.CartId,
                         Count = kvp.Value,
