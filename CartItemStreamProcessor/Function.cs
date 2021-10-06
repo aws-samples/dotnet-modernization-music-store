@@ -69,7 +69,7 @@ namespace CartItemStreamProcessor
                     batchIncrements[batchKey] = 0;
                 }
 
-                if (record.EventName == OperationType.INSERT 
+                if (record.EventName == OperationType.INSERT
                     || record.EventName == OperationType.MODIFY)
                 {
                     batchIncrements[batchKey] = int.Parse(quatity);
@@ -84,92 +84,60 @@ namespace CartItemStreamProcessor
                 }
             }
 
+            context.Logger.LogLine($"Aggregated dynamodb events to {batchIncrements.Count} records...");
+
             // Fetch multiple cart items from SQL Server based on CartId and AlbumId
             var cartItems = storeDB.Carts.Where(c => batchIncrements.Keys.Any(k => k.CartId == c.CartId && k.AlbumId == c.AlbumId)).ToList();
 
+            context.Logger.LogLine($"Fetched multiple CartItems from Sql Server");
+
             foreach (var kvp in batchIncrements)
             {
-                try
-                {
-                    // check if cart items exist in SQL Server database.
-                    var cartItem = cartItems.FirstOrDefault(c => c.CartId == kvp.Key.CartId && c.AlbumId == kvp.Key.AlbumId);
+                // check if cart items exist in SQL Server database.
+                var cartItem = cartItems.FirstOrDefault(c => c.CartId == kvp.Key.CartId && c.AlbumId == kvp.Key.AlbumId);
 
-                    // It would be 0 if there was only a modification to a gallery item
-                    if (cartItem != null)
+                if (cartItem == null && kvp.Value > 0)
+                {
+                    // Create a new cart item if no cart item exists
+                    cartItem = new Cart
                     {
-                        if (kvp.Value == 0)
-                            storeDB.Carts.Remove(cartItem);
-                        else
-                            cartItem.Count = kvp.Value;
+                        AlbumId = kvp.Key.AlbumId,
+                        CartId = kvp.Key.CartId,
+                        Count = kvp.Value,
+                        DateCreated = DateTime.Now
+                    };
+                    storeDB.Carts.Add(cartItem);
+
+                    context.Logger.LogLine($"Added Cart Item {kvp.Key.CartId} from user {kvp.Key.AlbumId} with quantity {kvp.Value}");
+                }
+                else
+                {
+                    if (kvp.Value == 0)
+                    {
+                        storeDB.Carts.Remove(cartItem);
+                        context.Logger.LogLine($"Removed Cart item {kvp.Key.CartId} from user {kvp.Key.AlbumId}");
                     }
                     else
                     {
-                        if (kvp.Value > 0)
-                        {
-                            // Create a new cart item if no cart item exists
-                            cartItem = new Cart
-                            {
-                                AlbumId = kvp.Key.AlbumId,
-                                CartId = kvp.Key.CartId,
-                                Count = kvp.Value,
-                                DateCreated = DateTime.Now
-                            };
-                            storeDB.Carts.Add(cartItem);
-                        }
+                        cartItem.Count = kvp.Value;
+                        context.Logger.LogLine($"Updated Cart Item {kvp.Key.CartId} from user {kvp.Key.AlbumId} by quantity {kvp.Value}");
                     }
-
-                    await storeDB.SaveChangesAsync();
-
-                }
-                catch (Exception e)
-                {
-                    context.Logger.LogLine($"Failed to update {kvp.Key.CartId} from user {kvp.Key.AlbumId} by increment {kvp.Value}: {e.Message}. Exception {e}");
                 }
             }
+
+            try
+            {
+                await storeDB.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                context.Logger.LogLine($"Failed to save changes in Sql Server. DynamoDb stream event count {dynamoEvent.Records.Count}. Exception {e}");
+            }
+
 
             context.Logger.LogLine("Stream processing complete.");
 
         }
-
-        //private async Task AddOrUpdateCart(string cartId, Guid albumId, int quantity)
-        //{
-        //    // Get the matching cart and album instances
-        //    var cartItem = storeDB.Carts.SingleOrDefault(
-        //        c => c.CartId == cartId
-        //        && c.AlbumId == albumId);
-
-        //    if (cartItem == null)
-        //    {
-        //        // Create a new cart item if no cart item exists
-        //        cartItem = new Cart
-        //        {
-        //            AlbumId = albumId,
-        //            CartId = cartId,
-        //            Count = quantity,
-        //            DateCreated = DateTime.Now
-        //        };
-
-        //        storeDB.Carts.Add(cartItem);
-        //    }
-        //    else
-        //    {
-        //        // If the item does exist in the cart, then add quantity.
-        //        cartItem.Count = cartItem.Count + quantity;
-        //    }
-
-        //    // Save changes
-        //    await storeDB.SaveChangesAsync();
-        //}
-
-        //private async Task RemoveFromCart(string cartId, Guid albumId)
-        //{
-        //    storeDB.Carts.Where(c => c.CartId == cartId
-        //        && c.AlbumId == albumId).Dele //.SqlQuery("delete from Cart where CartId={0} && albumdId={1}", cartId, albumId);
-
-        //    // Save changes
-        //    await storeDB.SaveChangesAsync();
-        //}
-
         private static string GetSecureDBConnectionString()
         {
             Console.WriteLine("Fetching RDS credentials from Secret Manager");
