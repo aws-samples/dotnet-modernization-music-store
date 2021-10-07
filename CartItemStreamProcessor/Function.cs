@@ -125,19 +125,19 @@ namespace CartItemStreamProcessor
                     };
                     storeDB.Carts.Add(cartItem);
 
-                    context.Logger.LogLine($"Added Cart Item {kvp.Key.CartId} from user {kvp.Key.AlbumId} with quantity {kvp.Value}");
+                    context.Logger.LogLine($"Added Album {kvp.Key.AlbumId} from user {kvp.Key.CartId} with quantity {kvp.Value}");
                 }
                 else
                 {
                     if (kvp.Value == 0)
                     {
                         storeDB.Carts.Remove(cartItem);
-                        context.Logger.LogLine($"Removed Cart item {kvp.Key.CartId} from user {kvp.Key.AlbumId}");
+                        context.Logger.LogLine($"Removed Album {kvp.Key.AlbumId} from user {kvp.Key.CartId}");
                     }
                     else
                     {
                         cartItem.Count = kvp.Value;
-                        context.Logger.LogLine($"Updated Cart Item {kvp.Key.CartId} from user {kvp.Key.AlbumId} by quantity {kvp.Value}");
+                        context.Logger.LogLine($"Updated Album {kvp.Key.AlbumId} from user {kvp.Key.CartId} by quantity {kvp.Value}");
                     }
                 }
             }
