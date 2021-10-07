@@ -30,19 +30,12 @@ namespace CartItemStreamProcessor
         /// </summary>
         public Function()
         {
-            try
-            {
-                string connectionString = GetSecureDBConnectionString();
-                Console.WriteLine("RDS DB connection string successfully created");
+            string connectionString = GetSecureDBConnectionString();
+        
+            Console.WriteLine("RDS DB connection string successfully created");
 
-                storeDB = new MusicStoreEntities(connectionString);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
+            storeDB = new MusicStoreEntities(connectionString);
         }
-
 
         /// <summary>
         /// A Lambda function to respond to HTTP Get methods from API Gateway
@@ -71,6 +64,7 @@ namespace CartItemStreamProcessor
                 if (record.EventName == OperationType.INSERT
                     || record.EventName == OperationType.MODIFY)
                 {
+                    // Insert and update will have the album count in shopping Cart.
                     var quatity = record.Dynamodb.NewImage["Count"]?.N;
                     batchIncrements[batchKey] = int.Parse(quatity);
                 }
@@ -88,8 +82,8 @@ namespace CartItemStreamProcessor
 
             context.Logger.LogLine($"Aggregated dynamodb events to {batchIncrements.Count} records...");
 
-            List<string> cartIds = batchIncrements.Keys.Select(k => k.CartId).ToList();
-            List<Guid> albumdIds = batchIncrements.Keys.Select(k => k.AlbumId).ToList();
+            List<string> cartIds = batchIncrements.Keys.Select(k => k.CartId).Distinct().ToList();
+            List<Guid> albumdIds = batchIncrements.Keys.Select(k => k.AlbumId).Distinct().ToList();
 
             try
             {
@@ -162,14 +156,7 @@ namespace CartItemStreamProcessor
             var secretsManagerClient = new AmazonSecretsManagerClient();
             GetSecretValueResponse response = null;
 
-            try
-            {
-                response = Task.Run(async () => await secretsManagerClient.GetSecretValueAsync(secretRequest)).Result;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
+            response = Task.Run(async () => await secretsManagerClient.GetSecretValueAsync(secretRequest)).Result;
 
             var secretCredetials = JsonConvert.DeserializeObject<SecretCredentials>(response.SecretString);
             var serverAddress = Environment.GetEnvironmentVariable(RDS_ENDPOINT);

@@ -43,7 +43,8 @@
                 },
                 "ManagedPolicyArns": [
 				    "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole",
-                    "arn:aws:iam::aws:policy/AWSLambdaInvocation-DynamoDB"
+                    "arn:aws:iam::aws:policy/AWSLambdaInvocation-DynamoDB",
+                    "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
                 ],
                 "Policies" : [
 					
