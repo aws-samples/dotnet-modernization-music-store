@@ -1,0 +1,14 @@
+﻿@using MvcMusicStore.Models
+@model SearchCriteriaModel
+
+<span id="search-box">
+    @using (Html.BeginForm("Lookup", "Search", FormMethod.Get))
+    {
+        @Html.EditorFor(x => x.SearchTerm) @: <input type="submit" value="Search"  /> 
+
+        if (!string.IsNullOrWhiteSpace(this.Model.ErrorMessage))
+        {
+           <br/><span id="error-message">@this.Model.ErrorMessage</span>
+        }
+    }
+</span>

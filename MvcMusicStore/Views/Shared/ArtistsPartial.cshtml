@@ -1,0 +1,14 @@
+﻿@model List<MvcMusicStore.Models.Artist>
+
+@if (!Model.Any())
+{
+    <p>No matching artists found</p>
+}
+else
+{
+    foreach (var artist in Model)
+    {
+        <div id="searchitem">@artist.Name</div>
+    }
+    <br />
+}

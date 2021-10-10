@@ -1,0 +1,19 @@
+﻿@model List<MvcMusicStore.Models.Genre>
+
+@if (!Model.Any())
+{
+    <p>No matching genres found</p>
+}else
+{
+    foreach (var genre in Model)
+    {
+        <div id="searchitem">
+        @Html.ActionLink(genre.Name,
+                        "Browse", "Store",
+                        new { Genre = genre.Name },
+                        null
+        )
+        </div>
+    }
+    <br/>
+}
