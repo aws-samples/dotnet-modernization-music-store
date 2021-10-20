@@ -58,7 +58,7 @@ namespace MvcMusicStore.Controllers
 
             // Get the name of the album to display confirmation
             string albumName = storeDB.Carts
-                .Single(item => item.RecordId == id).Album.Title;
+                .Single(item => item.RecordId == id).AlbumTitle;
 
             // Remove from cart
             int itemCount = cart.RemoveFromCart(id);

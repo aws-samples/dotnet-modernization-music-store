@@ -11,8 +11,7 @@ namespace MvcMusicStore.Models
         public Guid AlbumId { get; set; }
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }
-
-        public virtual Album Album { get; set; }
+        [StringLength(160)]      
         public virtual Order Order { get; set; }
     }
 }

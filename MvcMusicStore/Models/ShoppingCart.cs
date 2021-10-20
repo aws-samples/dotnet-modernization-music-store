@@ -39,6 +39,8 @@ c => c.CartId == ShoppingCartId
                 // Create a new cart item if no cart item exists
                 cartItem = new Cart
                 {
+                    AlbumTitle = album.Title,
+                    AlbumPrice = album.Price,
                     RecordId = Guid.NewGuid(),
                     AlbumId = album.AlbumId,
                     CartId = ShoppingCartId,
@@ -122,7 +124,7 @@ cart => cart.CartId == ShoppingCartId
             // sum all album price totals to get the cart total
             decimal? total = (from cartItems in storeDB.Carts
                               where cartItems.CartId == ShoppingCartId
-                              select (int?)cartItems.Count * cartItems.Album.Price).Sum();
+                              select (int?)cartItems.Count * cartItems.AlbumPrice).Sum();
             return total ?? decimal.Zero;
         }
 
@@ -140,12 +142,12 @@ cart => cart.CartId == ShoppingCartId
                     OrderDetailId = Guid.NewGuid(),
                     AlbumId = item.AlbumId,
                     OrderId = order.OrderId,
-                    UnitPrice = item.Album.Price,
+                    UnitPrice = item.AlbumPrice,
                     Quantity = item.Count
                 };
 
                 // Set the order total of the shopping cart
-                orderTotal += (item.Count * item.Album.Price);
+                orderTotal += (item.Count * item.AlbumPrice);
 
                 storeDB.OrderDetails.Add(orderDetail);
 
