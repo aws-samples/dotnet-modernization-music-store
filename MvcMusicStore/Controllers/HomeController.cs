@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
+using MvcMusicStore.Service;
+
 
 namespace MvcMusicStore.Controllers
 {
@@ -11,6 +13,7 @@ namespace MvcMusicStore.Controllers
         // GET: /Home/
 
         MusicStoreEntities storeDB = new MusicStoreEntities();
+        ICatalogService catalogSvc = new CatalogService();
 
         public ActionResult Index()
         {
@@ -25,10 +28,17 @@ namespace MvcMusicStore.Controllers
             // Group the order details by album and return
             // the albums with the highest count
 
-            return storeDB.Albums
-                .OrderByDescending(a => a.OrderDetails.Count())
-                .Take(count)
-                .ToList();
+            // Based on placed orders, get the top selling album IDs by quantity
+            var topSellingAlbums = storeDB.OrderDetails
+                    .GroupBy(d => d.AlbumId, d => d.Quantity)
+                    .Select(g => new { AlbumId = g.Key, Quantity = g.Sum() })
+                    .OrderByDescending(s => s.Quantity)
+                    .Take(count)
+                    .Select(t => t.AlbumId)
+                    .ToList();
+
+            return catalogSvc.GetAlbums(topSellingAlbums);
+
         }
     }
 }
