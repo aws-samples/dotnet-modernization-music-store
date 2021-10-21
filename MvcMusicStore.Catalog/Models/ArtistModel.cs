@@ -2,6 +2,7 @@
 
 namespace MvcMusicStore.Catalog.Models
 {
+    // TODO: Map this to the appropriate DynamoDB table (single table design)
     [DynamoDBTable("Artist")]
     public class ArtistModel
     {
