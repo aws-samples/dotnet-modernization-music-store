@@ -7,6 +7,7 @@ namespace MvcMusicStore.Catalog.Models
     public class ArtistModel
     {
         public string ArtistId { get; set; }
+        
         public string Name { get; set; }
     }
 }

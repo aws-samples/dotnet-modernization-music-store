@@ -33,40 +33,36 @@ namespace MvcMusicStore.Catalog
 
         public IEnumerable<GenreModel> Genres()
         {
-            // TODO: Stub - Implement with the "right" version of the single table design
-            return context.Scan<GenreModel>();
+            return context.Query<GenreModel>("GENRE", QueryOperator.BeginsWith, new[] { "genre#" });
         }
 
-        public GenreModel GenreByName(string name)
+        public GenreModel GenreByName(Guid genreId)
         {
-            // TODO: Stub - Implement with the "right" version of the single table design
-            return context.Scan<GenreModel>(new ScanCondition("Name", ScanOperator.Equal, name)).FirstOrDefault();
+            return context.Query<GenreModel>("GENRE", QueryOperator.Equal, new[] { $"genre#{genreId}" }).FirstOrDefault();
         }
 
-        public IEnumerable<AlbumModel> Albums()
+        public AlbumModel AlbumById(Guid id)
         {
-            // TODO: Stub - Implement with the "right" version of the single table design
-            return context.Scan<AlbumModel>();
+            return context.Load<AlbumModel>($"album#{id}");
+        }
+        public IEnumerable<AlbumModel> AlbumsByGenre(Guid genreId)
+        {
+            return context.Query<AlbumModel>(
+                $"genre#{genreId}", 
+                QueryOperator.BeginsWith, 
+                new[] { "album#" }, 
+                new DynamoDBOperationConfig { IndexName = "album-genre" });
         }
 
-        public AlbumModel AlbumById(string id)
+        public IEnumerable<AlbumModel> AlbumsByIdList(IEnumerable<Guid> ids)
         {
-            // TODO: Stub - Implement with the "right" version of the single table design
-            return context.Load<AlbumModel>(id);
-        }
-        public IEnumerable<AlbumModel> AlbumsByGenre(string genreId)
-        {
-            // TODO: Stub - Implement with the "right" version of the single table design
-            return context.Scan<AlbumModel>(new ScanCondition("GenreId", ScanOperator.Equal, genreId));
-        }
+            var albumBatch = context.CreateBatchGet<AlbumModel>();
 
-        public IEnumerable<AlbumModel> AlbumsByIdList(IEnumerable<string> ids)
-        {
-            // TODO: Stub - Implement with the "right" version of the single table design
-            foreach (var id in ids)
-            {
-                yield return AlbumById(id);
-            }
+            ids.ToList().ForEach(i => albumBatch.AddKey(i));
+
+            albumBatch.Execute();
+
+            return albumBatch.Results;
         }
 
     }
