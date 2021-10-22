@@ -16,15 +16,15 @@ namespace MvcMusicStore.Api.Controllers
 
         [HttpGet]
         [Route("genres")]
-        public IHttpActionResult Genres(string name = null)
+        public IHttpActionResult Genres(string genreId = null)
         {
-            if (string.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(genreId))
             {
                 return Ok(client.Genres());
             }
             else
             {
-                return Ok(new List<GenreModel> { client.GenreByName(name) });
+                return Ok(new List<GenreModel> { client.GenreById(Guid.Parse(genreId.ToUpper())) });
             }
         }
 
@@ -35,12 +35,12 @@ namespace MvcMusicStore.Api.Controllers
         {
             if (!string.IsNullOrEmpty(idlist))
             {
-                var idArray = idlist.ToUpper().Split(',');
+                var idArray = idlist.ToUpper().Split(',').Select(id=> Guid.Parse(id));
                 return Ok(client.AlbumsByIdList(idArray));
             }
             else if (!string.IsNullOrEmpty(genreid))
             {
-                return Ok(client.AlbumsByGenre(genreid.ToUpper()));
+                return Ok(client.AlbumsByGenre(Guid.Parse(genreid.ToUpper())));
             }
             return Ok(client.Albums());
         }
