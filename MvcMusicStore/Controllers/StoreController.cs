@@ -30,7 +30,8 @@ namespace MvcMusicStore.Controllers
         // GET: /Store/Details/5
         public ActionResult Details(int id)
         {
-            var album = storeDB.Albums.Find(id);
+            var album = storeDB.Albums.Include("Genre").Include("Artist")
+                .FirstOrDefault(a => a.AlbumId == id);
             return View(album);
         }
 
