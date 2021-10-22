@@ -31,16 +31,16 @@ namespace MvcMusicStore.Catalog
             context = new DynamoDBContext(dynamoClient);
         }
 
-        public IEnumerable<Genre> Genres()
+        public IEnumerable<GenreModel> Genres()
         {
             // TODO: Stub - Implement with the "right" version of the single table design
-            return context.Scan<Genre>();
+            return context.Scan<GenreModel>();
         }
 
-        public Genre GenreByName(string name)
+        public GenreModel GenreByName(string name)
         {
             // TODO: Stub - Implement with the "right" version of the single table design
-            return context.Scan<Genre>(new ScanCondition("Name", ScanOperator.Equal, name)).FirstOrDefault();
+            return context.Scan<GenreModel>(new ScanCondition("Name", ScanOperator.Equal, name)).FirstOrDefault();
         }
 
         public IEnumerable<AlbumModel> Albums()

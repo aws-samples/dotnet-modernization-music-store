@@ -4,7 +4,7 @@ namespace MvcMusicStore.Catalog.Models
 {
     // TODO: Map this to the appropriate DynamoDB table (single table design)
     [DynamoDBTable("Genre")]
-    public class Genre
+    public class GenreModel
     {
         [DynamoDBHashKey]
         public string GenreId { get; set; }

@@ -49,7 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Models\ArtistModel.cs" />
-    <Compile Include="Models\Genre.cs" />
+    <Compile Include="Models\GenreModel.cs" />
     <Compile Include="Models\AlbumModel.cs" />
     <Compile Include="MusicStoreDBClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
