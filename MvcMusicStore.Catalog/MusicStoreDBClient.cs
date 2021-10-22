@@ -51,8 +51,16 @@ namespace MvcMusicStore.Catalog
 
         public AlbumModel AlbumById(string id)
         {
-            // TODO: Stub - Implement with the "right" version of the single table design
-            return context.Load<AlbumModel>(id);
+            // TODO: Stub - Implement with the "right" version of the single table design (this is only for testing)
+            var album = context.Load<AlbumModel>(id);
+            if (album != null)
+            {
+                var artist = context.Load<ArtistModel>(album.ArtistId);
+                var genre = context.Load<GenreModel>(album.GenreId);
+                album.Artist = artist;
+                album.Genre = genre;
+            }
+            return album;
         }
         public IEnumerable<AlbumModel> AlbumsByGenre(string genreId)
         {

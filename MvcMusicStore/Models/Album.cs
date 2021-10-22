@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -24,8 +24,7 @@ namespace MvcMusicStore.Models
         public string Title { get; set; }
 
         [Required(ErrorMessage = "Price is required")]
-        [Range(0.01, 100.00,
-            ErrorMessage = "Price must be between 0.01 and 100.00")]
+        [Range(0.01, 100.00, ErrorMessage = "Price must be between 0.01 and 100.00")]
         public decimal Price { get; set; }
 
         [DisplayName("Album Art URL")]
@@ -33,6 +32,7 @@ namespace MvcMusicStore.Models
         public string AlbumArtUrl { get; set; }
 
         public virtual Genre Genre { get; set; }
+
         public virtual Artist Artist { get; set; }
     }
 }

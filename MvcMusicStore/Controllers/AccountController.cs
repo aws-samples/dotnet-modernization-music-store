@@ -1,4 +1,4 @@
-﻿using MvcMusicStore.Models;
+using MvcMusicStore.Models;
 using System;
 using System.Web.Mvc;
 using System.Web.Security;
@@ -7,19 +7,16 @@ namespace MvcMusicStore.Controllers
 {
     public class AccountController : Controller
     {
-
         private void MigrateShoppingCart(string UserName)
         {
             // Associate shopping cart items with logged-in user
             var cart = ShoppingCart.GetCart(this.HttpContext);
-
             cart.MigrateCart(UserName);
             Session[ShoppingCart.CartSessionKey] = UserName;
         }
 
         //
         // GET: /Account/LogOn
-
         public ActionResult LogOn()
         {
             return View();
@@ -27,7 +24,6 @@ namespace MvcMusicStore.Controllers
 
         //
         // POST: /Account/LogOn
-
         [HttpPost]
         public ActionResult LogOn(LogOnModel model, string returnUrl)
         {
@@ -36,10 +32,8 @@ namespace MvcMusicStore.Controllers
                 if (Membership.ValidateUser(model.UserName, model.Password))
                 {
                     MigrateShoppingCart(model.UserName);
-
                     FormsAuthentication.SetAuthCookie(model.UserName, model.RememberMe);
-                    if (Url.IsLocalUrl(returnUrl) && returnUrl.Length > 1 && returnUrl.StartsWith("/")
-                        && !returnUrl.StartsWith("//") && !returnUrl.StartsWith("/\\"))
+                    if (Url.IsLocalUrl(returnUrl) && returnUrl.Length > 1 && returnUrl.StartsWith("/") && !returnUrl.StartsWith("//") && !returnUrl.StartsWith("/\\"))
                     {
                         return Redirect(returnUrl);
                     }
@@ -60,19 +54,15 @@ namespace MvcMusicStore.Controllers
 
         //
         // GET: /Account/LogOff
-
         public ActionResult LogOff()
         {
             FormsAuthentication.SignOut();
-
             Session.Abandon();
-
             return RedirectToAction("Logon", "Account");
         }
 
         //
         // GET: /Account/Register
-
         public ActionResult Register()
         {
             return View();
@@ -80,7 +70,6 @@ namespace MvcMusicStore.Controllers
 
         //
         // POST: /Account/Register
-
         [HttpPost]
         public ActionResult Register(RegisterModel model)
         {
@@ -89,11 +78,9 @@ namespace MvcMusicStore.Controllers
                 // Attempt to register the user
                 MembershipCreateStatus createStatus;
                 Membership.CreateUser(model.UserName, model.Password, model.Email, "question", "answer", true, null, out createStatus);
-
                 if (createStatus == MembershipCreateStatus.Success)
                 {
                     MigrateShoppingCart(model.UserName);
-
                     FormsAuthentication.SetAuthCookie(model.UserName, false /* createPersistentCookie */);
                     return RedirectToAction("Index", "Home");
                 }
@@ -109,7 +96,6 @@ namespace MvcMusicStore.Controllers
 
         //
         // GET: /Account/ChangePassword
-
         [Authorize]
         public ActionResult ChangePassword()
         {
@@ -118,14 +104,12 @@ namespace MvcMusicStore.Controllers
 
         //
         // POST: /Account/ChangePassword
-
         [Authorize]
         [HttpPost]
         public ActionResult ChangePassword(ChangePasswordModel model)
         {
             if (ModelState.IsValid)
             {
-
                 // ChangePassword will throw an exception rather
                 // than return false in certain failure scenarios.
                 bool changePasswordSucceeded;
@@ -155,13 +139,12 @@ namespace MvcMusicStore.Controllers
 
         //
         // GET: /Account/ChangePasswordSuccess
-
         public ActionResult ChangePasswordSuccess()
         {
             return View();
         }
 
-        #region Status Codes
+#region Status Codes
         private static string ErrorCodeToString(MembershipCreateStatus createStatus)
         {
             // See http://go.microsoft.com/fwlink/?LinkID=177550 for
@@ -170,35 +153,26 @@ namespace MvcMusicStore.Controllers
             {
                 case MembershipCreateStatus.DuplicateUserName:
                     return "User name already exists. Please enter a different user name.";
-
                 case MembershipCreateStatus.DuplicateEmail:
                     return "A user name for that e-mail address already exists. Please enter a different e-mail address.";
-
                 case MembershipCreateStatus.InvalidPassword:
                     return "The password provided is invalid. Please enter a valid password value.";
-
                 case MembershipCreateStatus.InvalidEmail:
                     return "The e-mail address provided is invalid. Please check the value and try again.";
-
                 case MembershipCreateStatus.InvalidAnswer:
                     return "The password retrieval answer provided is invalid. Please check the value and try again.";
-
                 case MembershipCreateStatus.InvalidQuestion:
                     return "The password retrieval question provided is invalid. Please check the value and try again.";
-
                 case MembershipCreateStatus.InvalidUserName:
                     return "The user name provided is invalid. Please check the value and try again.";
-
                 case MembershipCreateStatus.ProviderError:
                     return "The authentication provider returned an error. Please verify your entry and try again. If the problem persists, please contact your system administrator.";
-
                 case MembershipCreateStatus.UserRejected:
                     return "The user creation request has been canceled. Please verify your entry and try again. If the problem persists, please contact your system administrator.";
-
                 default:
                     return "An unknown error occurred. Please verify your entry and try again. If the problem persists, please contact your system administrator.";
             }
         }
-        #endregion
+#endregion
     }
 }

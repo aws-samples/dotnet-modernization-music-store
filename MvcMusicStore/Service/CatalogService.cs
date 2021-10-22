@@ -6,6 +6,7 @@ using System.Web;
 
 namespace MvcMusicStore.Service
 {
+    [Obsolete("We have fully migrated to HttpCatalogService")]
     public class CatalogService : ICatalogService
     {
         private MusicStoreEntities storeDb;

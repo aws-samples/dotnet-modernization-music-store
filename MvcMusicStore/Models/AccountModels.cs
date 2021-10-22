@@ -1,10 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.Web.Mvc;
 using Compare = System.ComponentModel.DataAnnotations.CompareAttribute;
 
 namespace MvcMusicStore.Models
 {
-
     public class ChangePasswordModel
     {
         [Required]
