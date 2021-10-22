@@ -4,7 +4,7 @@ using System;
 namespace MvcMusicStore.Catalog.Models
 {
     // TODO: Map this to the appropriate DynamoDB table (single table design)
-    [DynamoDBTable("Album")]
+    [DynamoDBTable("Albums")]
     public class AlbumModel
     {
         /// <summary>
@@ -38,6 +38,18 @@ namespace MvcMusicStore.Catalog.Models
         }
 
         public string ArtistId { get; set; }
+
+        [DynamoDBGlobalSecondaryIndexHashKey]
+        public string GS1PK { get; set; }
+
+        [DynamoDBGlobalSecondaryIndexHashKey]
+        public string GS2PK { get; set; }
+
+        [DynamoDBGlobalSecondaryIndexRangeKey]
+        public string GS1SK { get; set; }
+
+        [DynamoDBGlobalSecondaryIndexRangeKey]
+        public string GS2SK { get; set; }
 
         public string Title { get; set; }
 

@@ -4,7 +4,7 @@ using System;
 namespace MvcMusicStore.Catalog.Models
 {
     // TODO: Map this to the appropriate DynamoDB table (single table design)
-    [DynamoDBTable("Album")]
+    [DynamoDBTable("Albums")]
     public class GenreModel
     {
         private Guid? _genreId;

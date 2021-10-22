@@ -51,7 +51,7 @@ namespace MvcMusicStore.Catalog
                 $"genre#{genreId}",
                 QueryOperator.BeginsWith,
                 new[] { "album#" },
-                new DynamoDBOperationConfig { IndexName = "album-genre" });
+                new DynamoDBOperationConfig { IndexName = "album-genre-index" });
         }
 
         public IEnumerable<AlbumModel> Albums()
@@ -60,7 +60,7 @@ namespace MvcMusicStore.Catalog
               "ALBUM",
                QueryOperator.BeginsWith,
                new[] { "album#" },
-               new DynamoDBOperationConfig { IndexName = "albums" });
+               new DynamoDBOperationConfig { IndexName = "albums-index" });
         }
 
         public IEnumerable<AlbumModel> AlbumsByIdList(IEnumerable<Guid> ids)
