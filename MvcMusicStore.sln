@@ -10,6 +10,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LinqPad", "LinqPad", "{FB4AC48D-832D-4E65-ACC3-6539064C3254}"
+	ProjectSection(SolutionItems) = preProject
+		DataExport\LinqPadScripts\albums.linq = DataExport\LinqPadScripts\albums.linq
+		DataExport\LinqPadScripts\artists.linq = DataExport\LinqPadScripts\artists.linq
+		DataExport\LinqPadScripts\genres.linq = DataExport\LinqPadScripts\genres.linq
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Postman", "Postman", "{90D6E3AD-71CE-491A-9642-E3BC60060641}"
+	ProjectSection(SolutionItems) = preProject
+		DataExport\PostmanCollection\MusicStore OpenSearch.postman_collection.json = DataExport\PostmanCollection\MusicStore OpenSearch.postman_collection.json
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,6 +35,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FB4AC48D-832D-4E65-ACC3-6539064C3254} = {08E725C4-E789-4DBA-8746-EEB44B827DD7}
+		{90D6E3AD-71CE-491A-9642-E3BC60060641} = {08E725C4-E789-4DBA-8746-EEB44B827DD7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DCA17B64-F3F7-4AE8-8D49-171358610DDB}

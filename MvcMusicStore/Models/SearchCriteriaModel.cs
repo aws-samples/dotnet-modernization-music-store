@@ -2,10 +2,13 @@
 using System.ComponentModel.DataAnnotations;
 using System.Web.Mvc;
 using System.Linq;
-using System.Data.Entity;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System;
+using System.Diagnostics;
+using System.Configuration;
+using Nest;
+using Newtonsoft.Json;
 
 namespace MvcMusicStore.Models
 {
@@ -19,51 +22,90 @@ namespace MvcMusicStore.Models
         [HiddenInput(DisplayValue = false)]
         public string ErrorMessage { get; set; }
 
+        Lazy<ElasticClient> elasticClient = new Lazy<ElasticClient>(() => {
+            string endpoint = ConfigurationManager.AppSettings["OpensearchEndpoint"];
+            string username = ConfigurationManager.AppSettings["OpensearchUsername"];
+            string pwd = ConfigurationManager.AppSettings["OpensearchPassword"];
+
+            var node = new Uri(endpoint);
+            var settings = new ConnectionSettings(node).BasicAuthentication(username, pwd);
+            var esClient = new ElasticClient(settings);
+
+            return esClient;
+        });
+
+        public async Task<IReadOnlyCollection<IHit<Dictionary<string, object>>>> Search(string searchTerm) =>
+            (await elasticClient.Value.SearchAsync<Dictionary<string, object>>(s => s
+                .AllIndices()
+                .Query(q => q.SimpleQueryString(sq => sq.AnalyzeWildcard(true).Query($"*{searchTerm}*")))
+            )).Hits;
+
         internal async Task<SearchResultsViewModel> Search()
         {
-            Task<List<Album>> albums = SearchAlbums(this.SearchTerm);
-            Task<List<Artist>> artists = SearchArtists(this.SearchTerm);
-            Task<List<Genre>> genres = SearchGenres(this.SearchTerm);
-            
-            // Run all queries in parallel
-            await Task.WhenAll(albums, artists, genres);
+            var hits = await Search(this.SearchTerm);
+
+            Dictionary<Type, List<object>> modelMapping = GroupHitsByModel(hits, new Dictionary<string, Type>()
+            {
+                ["genres"] = typeof(Genre),
+                ["artists"] = typeof(Artist),
+                ["albums"] = typeof(Album)
+            });
 
             return new SearchResultsViewModel
             {
-                Albums = albums.Result,
-                Artists = artists.Result,
-                Genres = genres.Result
+                Albums = ResultsOfType<Album>(modelMapping),
+                Artists = ResultsOfType<Artist>(modelMapping),
+                Genres = ResultsOfType<Genre>(modelMapping)
             };
         }
 
-        private static async Task<List<T>> RunAsyncQuery<T>(Func<MusicStoreEntities, IQueryable<T>> queryCallback)
+        public static List<T> ResultsOfType<T>(Dictionary<Type, List<object>> allResults)
         {
-            using (var storeDb = new MusicStoreEntities())
+            List<object> results;
+            return allResults.TryGetValue(typeof(T), out results) ? results.Cast<T>().ToList() : new List<T>();
+        }
+            
+
+        /// <summary>
+        /// Groups search hits by type and converts Dictionary objects to POCOs.
+        /// TODO: Update with using NEST native mapping, if possible.
+        /// </summary>
+        /// <param name="hits">Search hits</param>
+        /// <param name="indexModelMapping">Index to </param>
+        /// <returns></returns>
+        public static Dictionary<Type, List<object>> GroupHitsByModel(
+                IReadOnlyCollection<IHit<Dictionary<string, object>>> hits,
+                Dictionary<string, Type> indexTypeMap)
+        {
+            // TODO: re-write as a group-by ToDictionary() linq/lambda.
+
+            var map = new Dictionary<Type, List<object>>();
+
+            foreach (var hit in hits)
             {
-                return await queryCallback(storeDb).ToListAsync();
+                Type objectType = indexTypeMap[hit.Index];
+                List<object> entries;
+
+                if (!map.TryGetValue(objectType, out entries))
+                {
+                    entries = new List<object>();
+                    map[objectType] = entries;
+                }
+
+                var result = ToObject(objectType, hit.Source);
+                entries.Add(result);
             }
+
+            return map;
         }
 
-        private static Task<List<Album>> SearchAlbums(string searchTerm) =>
-            RunAsyncQuery(storeDB => 
-                from album in storeDB.Albums
-                where album.Title.Contains(searchTerm)
-                select album
-            );
+        public static object ToObject(Type pocoType, IDictionary<string, object> source)
+        {
+            // TODO; Figure out ES native mapping for better performance
+            var json = JsonConvert.SerializeObject(source, Formatting.Indented);
+            var poco = JsonConvert.DeserializeObject(json, pocoType);
 
-
-        private static Task<List<Artist>> SearchArtists(string searchTerm) =>
-            RunAsyncQuery(storeDB =>
-                from artist in storeDB.Artists
-                where artist.Name.Contains(searchTerm)
-                select artist
-            );
-
-        private static Task<List<Genre>> SearchGenres(string searchTerm) =>
-            RunAsyncQuery(storeDB =>
-                from genre in storeDB.Genres
-                where genre.Name.Contains(searchTerm)
-                select genre
-            );
+            return poco;
+        }
     }
 }
