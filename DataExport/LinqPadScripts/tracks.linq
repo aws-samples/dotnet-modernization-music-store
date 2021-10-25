@@ -11,11 +11,18 @@
   <Namespace>System.Text.Json</Namespace>
 </Query>
 
-IQueryable GetArtists() =>
-	from a in this.Artists
-	select new { id = a.ArtistId, a.ArtistId, a.Name };
+IQueryable GetTracks() =>
+from t in Tracks
+select new
+{
+	id = t.TrackId,
+	t.TrackId,
+	t.Title,
+	t.AlbumId,
+	t.Lyrics,
+};
 
-ToElasticSearchJson(GetArtists, "artists").Dump();
+ToElasticSearchJson(GetTracks, "tracks").Dump();
 
 string ToElasticSearchJson(Func<IEnumerable> query, string esIndexName, string idPropertyName = "id", string esTypeName = "_doc") =>
 	string.Join("\n", ToElasticSearchJsonItems(query, esIndexName, idPropertyName, esTypeName, "delete", "create"));
@@ -27,7 +34,7 @@ IEnumerable<string> ToElasticSearchJsonItems(Func<IEnumerable> query, string esI
 		(string id, ExpandoObject obj) = ObjectLessId(item, idPropertyName);
 		foreach (object esCommand in CreateEsCommands(id, esIndexName, esTypeName, esCommands))
 			yield return JsonSerializer.Serialize(esCommand);
-		if (esCommands.Contains("create") || esCommands.Contains("update"))
+		if(esCommands.Contains("create") || esCommands.Contains("update"))
 			yield return JsonSerializer.Serialize(obj);
 	}
 	yield return "\n";

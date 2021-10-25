@@ -29,7 +29,8 @@ IEnumerable<string> ToElasticSearchJsonItems(Func<IEnumerable> query, string esI
 		(string id, ExpandoObject obj) = ObjectLessId(item, idPropertyName);
 		foreach(object esCommand in CreateEsCommands(id, esIndexName, esTypeName, esCommands))
 			yield return JsonSerializer.Serialize(esCommand);
-		yield return JsonSerializer.Serialize(obj);
+		if(esCommands.Contains("create") || esCommands.Contains("update"))
+			yield return JsonSerializer.Serialize(obj);
 	}
 	yield return "\n";
 }

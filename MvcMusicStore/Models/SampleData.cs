@@ -176,7 +176,7 @@ namespace MvcMusicStore.Models
                 new Artist { ArtistId = Guid.NewGuid(), Name = "Zeca Pagodinho" }
             };
 
-            new List<Album>
+            var albums = new List<Album>
             {
                 new Album { AlbumId = Guid.NewGuid(), Title = "The Best Of Men At Work", Genre = genres.Single(g => g.Name == "Rock"), Price = 8.99M, Artist = artists.Single(a => a.Name == "Men At Work"), AlbumArtUrl = "/Content/Images/placeholder.gif" },
                 new Album { AlbumId = Guid.NewGuid(), Title = "A Copland Celebration, Vol. I", Genre = genres.Single(g => g.Name == "Classical"), Price = 8.99M, Artist = artists.Single(a => a.Name == "Aaron Copland & London Symphony Orchestra"), AlbumArtUrl = "/Content/Images/placeholder.gif" },
@@ -424,7 +424,14 @@ namespace MvcMusicStore.Models
                 new Album { AlbumId = Guid.NewGuid(), Title = "Bartok: Violin & Viola Concertos", Genre = genres.Single(g => g.Name == "Classical"), Price = 8.99M, Artist = artists.Single(a => a.Name == "Yehudi Menuhin"), AlbumArtUrl = "/Content/Images/placeholder.gif" },
                 new Album { AlbumId = Guid.NewGuid(), Title = "Bach: The Cello Suites", Genre = genres.Single(g => g.Name == "Classical"), Price = 8.99M, Artist = artists.Single(a => a.Name == "Yo-Yo Ma"), AlbumArtUrl = "/Content/Images/placeholder.gif" },
                 new Album { AlbumId = Guid.NewGuid(), Title = "Ao Vivo [IMPORT]", Genre = genres.Single(g => g.Name == "Latin"), Price = 8.99M, Artist = artists.Single(a => a.Name == "Zeca Pagodinho"), AlbumArtUrl = "/Content/Images/placeholder.gif" },
-            }.ForEach(a => context.Albums.Add(a));
+            };
+            albums.ForEach(t => context.Albums.Add(t));
+
+            new List<Track>
+            {
+                
+
+            }.ForEach(t => context.Tracks.Add(t));
         }
     }
 }
