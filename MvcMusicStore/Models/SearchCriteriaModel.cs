@@ -32,7 +32,7 @@ namespace MvcMusicStore.Models
 
         internal async Task<SearchResultsViewModel> Search()
         {
-            Dictionary<Type, List<object>> groupedSearchResults = await osHelper.Search(this.SearchTerm);
+            Dictionary<Type, IEnumerable<object>> groupedSearchResults = await osHelper.Search(this.SearchTerm);
 
             var tracks = OpenSearchHelper.ResultsOfType<Track>(groupedSearchResults);
             var trackAlbums = await GetTrackAlbums(tracks);
@@ -53,7 +53,7 @@ namespace MvcMusicStore.Models
         {
             var albumIds = tracks.Select(t => t.AlbumId.ToString()).Distinct(); // deduplicated abum IDs
             
-            Dictionary<Type, List<object>> results = await osHelper.MultiGetSameType("albums", albumIds);
+            Dictionary<Type, IEnumerable<object>> results = await osHelper.MultiGetSameType("albums", albumIds);
             
             return OpenSearchHelper.ResultsOfType<Album>(results);
         }

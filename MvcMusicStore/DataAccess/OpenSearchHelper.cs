@@ -35,7 +35,7 @@ namespace MvcMusicStore.DataAccess
             this.indexModelMap = indexModelMap;
         }
 
-        public async Task<Dictionary<Type, List<object>>> Search(string searchTerm)
+        public async Task<Dictionary<Type, IEnumerable<object>>> Search(string searchTerm)
         {
             var response = await elasticClient.Value.SearchAsync<Dictionary<string, object>>(s => s
                 .AllIndices()
@@ -45,23 +45,23 @@ namespace MvcMusicStore.DataAccess
             var hits = response.Hits
                 .Select(hit => new HitEntry { Index = hit.Index, Source = hit.Source });
 
-            Dictionary<Type, List<object>> groupedSearchResults = this.GroupHitsByModel(hits);
+            Dictionary<Type, IEnumerable<object>> groupedSearchResults = this.GroupHitsByModel(hits);
             return groupedSearchResults;
         }
 
-        public async Task<Dictionary<Type, List<object>>> MultiGetSameType(string index, IEnumerable<string> ids)
+        public async Task<Dictionary<Type, IEnumerable<object>>> MultiGetSameType(string index, IEnumerable<string> ids)
         {
             var response = await elasticClient.Value.MultiGetAsync(m => m.GetMany<object>(ids, (op, id) => op.Index(index)));
             var hits = response.Hits
                 .Select(hit => new HitEntry { Index = hit.Index, Source = (Dictionary<string, object>)hit.Source });
 
-            Dictionary<Type, List<object>> groupedSearchResults = this.GroupHitsByModel(hits);
+            Dictionary<Type, IEnumerable<object>> groupedSearchResults = this.GroupHitsByModel(hits);
             return groupedSearchResults;
         }
 
-        public static IEnumerable<T> ResultsOfType<T>(Dictionary<Type, List<object>> allResults)
+        public static IEnumerable<T> ResultsOfType<T>(Dictionary<Type, IEnumerable<object>> allResults)
         {
-            List<object> results;
+            IEnumerable<object> results;
             return allResults.TryGetValue(typeof(T), out results) ? results.Cast<T>() : Enumerable.Empty<T>();
         }
 
@@ -71,28 +71,18 @@ namespace MvcMusicStore.DataAccess
         /// </summary>
         /// <param name="hits">Search hits</param>
         /// <param name="indexModelMap"></param>
-        private Dictionary<Type, List<object>> GroupHitsByModel(IEnumerable<HitEntry> hits)
+        private Dictionary<Type, IEnumerable<object>> GroupHitsByModel(IEnumerable<HitEntry> hits)
         {
-            // TODO: re-write as a group-by ToDictionary() linq/lambda.
+            var groupQ = from hit in hits
+                         where indexModelMap.ContainsKey(hit.Index)
+                         group hit by hit.Index into g
+                         let type = indexModelMap[g.Key]
+                         select new { 
+                             type, 
+                             results = g.Select(i => ToObject(type, i.Source)) 
+                         };
 
-            var map = new Dictionary<Type, List<object>>();
-
-            foreach (var hit in hits)
-            {
-                Type objectType = indexModelMap[hit.Index];
-                List<object> entries;
-
-                if (!map.TryGetValue(objectType, out entries))
-                {
-                    entries = new List<object>();
-                    map[objectType] = entries;
-                }
-
-                var result = ToObject(objectType, hit.Source);
-                entries.Add(result);
-            }
-
-            return map;
+            return groupQ.ToDictionary(g => g.type, g => g.results);
         }
 
         private static object ToObject(Type pocoType, IDictionary<string, object> source)
