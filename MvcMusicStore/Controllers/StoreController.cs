@@ -25,8 +25,12 @@ namespace MvcMusicStore.Controllers
         public ActionResult Browse(string genre)
         {
             // Retrieve Genre and its Associated Albums from database
+            Guid genreId;
+            if (!Guid.TryParse(genre, out genreId)) genreId = Guid.Empty;
+
+
             var genreModel = storeDB.Genres.Include("Albums")
-                .Single(g => g.Name == genre);
+                .Single(g => g.GenreId == genreId);
 
             return View(genreModel);
         }
