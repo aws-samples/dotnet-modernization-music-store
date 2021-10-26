@@ -23,7 +23,7 @@ namespace MvcMusicStore.Controllers
         public ActionResult Browse(Guid genreId)
         {
             // Retrieve Genre and its Associated Albums from database
-            var genreModel = catalogSvc.GetGenre(genreId);
+            var genreModel = catalogSvc.GetGenreById(genreId);
             var albums = catalogSvc.GetAlbumsByGenre(genreId).OrderBy(a => a.Title).ToList();
             var viewModel = new StoreBrowseViewModel{Genre = genreModel, Albums = albums};
             return View(viewModel);
