@@ -10,6 +10,7 @@ namespace MvcMusicStore.Catalog.Models
         /// <summary>
         /// DynamoDB partition Key.
         /// Note: Album dynamodb table holds albums, artists and genres. Using generic partition key name.
+        /// value: album#{albumId}
         /// </summary>
         [DynamoDBHashKey]
         public string PK { get; set; }
@@ -17,6 +18,7 @@ namespace MvcMusicStore.Catalog.Models
         /// <summary>
         /// DynamoDb Sort Key.
         /// Note: Album dynamodb table holds albums, artists and genres. Using generic sort key name.
+        /// value: genre#{genreId}
         /// </summary>
         [DynamoDBRangeKey]
         public string SK { get; set; }
@@ -37,17 +39,29 @@ namespace MvcMusicStore.Catalog.Models
             set => _genreId = value;
         }
 
-        public string ArtistId { get; set; }
+        public Guid ArtistId { get; set; }
 
+        /// <summary>
+        /// This Global seconday index Partition Key stores GenreId (prepended by genre#). 
+        /// </summary>
         [DynamoDBGlobalSecondaryIndexHashKey]
         public string GS1PK { get; set; }
 
+        /// <summary>
+        /// This Global Seconday Index Partition Key stores keyword 'ALBUM'.
+        /// </summary>
         [DynamoDBGlobalSecondaryIndexHashKey]
         public string GS2PK { get; set; }
 
+        /// <summary>
+        /// This Global Seconday Index Sort Key stores album Id (prepended by album#).
+        /// </summary>
         [DynamoDBGlobalSecondaryIndexRangeKey]
         public string GS1SK { get; set; }
 
+        /// <summary>
+        /// This Global Seconday Index Sort Key stores album Id (prepended by album#).
+        /// </summary>
         [DynamoDBGlobalSecondaryIndexRangeKey]
         public string GS2SK { get; set; }
 

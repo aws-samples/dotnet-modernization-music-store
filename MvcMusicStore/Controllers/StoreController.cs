@@ -20,11 +20,11 @@ namespace MvcMusicStore.Controllers
 
         //
         // GET: /Store/Browse?genre=Disco
-        public ActionResult Browse(string genre)
+        public ActionResult Browse(Guid genreId)
         {
             // Retrieve Genre and its Associated Albums from database
-            var genreModel = catalogSvc.GetGenreByName(genre);
-            var albums = catalogSvc.GetAlbumsByGenre(genreModel.GenreId).OrderBy(a => a.Title).ToList();
+            var genreModel = catalogSvc.GetGenre(genreId);
+            var albums = catalogSvc.GetAlbumsByGenre(genreId).OrderBy(a => a.Title).ToList();
             var viewModel = new StoreBrowseViewModel{Genre = genreModel, Albums = albums};
             return View(viewModel);
         }

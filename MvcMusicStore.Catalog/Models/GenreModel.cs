@@ -10,6 +10,13 @@ namespace MvcMusicStore.Catalog.Models
         private Guid? _genreId;
 
         /// <summary>
+        /// DynamoDB partition Key.
+        /// Note: Album dynamodb table holds albums, artists and genres. Using generic partition key name.
+        /// </summary>
+        [DynamoDBHashKey]
+        public string PK { get; set; }
+
+        /// <summary>
         /// DynamoDb Sort Key.
         /// Note: Album dynamodb table holds albums, artists and genres. Using generic sort key name.
         /// </summary>
@@ -22,6 +29,7 @@ namespace MvcMusicStore.Catalog.Models
             set => _genreId = value;
         }
 
+        [DynamoDBProperty("Genre")]
         public string Name { get; set; }
 
         public string Description { get; set; }

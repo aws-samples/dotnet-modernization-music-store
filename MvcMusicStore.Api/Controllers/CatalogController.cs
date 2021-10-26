@@ -24,7 +24,7 @@ namespace MvcMusicStore.Api.Controllers
             }
             else
             {
-                return Ok(new List<GenreModel> { client.GenreById(Guid.Parse(genreId.ToUpper())) });
+                return Ok(new List<GenreModel> { client.GenreById(genreId.ToUpper()) });
             }
         }
 
@@ -35,12 +35,12 @@ namespace MvcMusicStore.Api.Controllers
         {
             if (!string.IsNullOrEmpty(idlist))
             {
-                var idArray = idlist.ToUpper().Split(',').Select(id=> Guid.Parse(id));
+                var idArray = idlist.ToUpper().Split(',');
                 return Ok(client.AlbumsByIdList(idArray));
             }
             else if (!string.IsNullOrEmpty(genreid))
             {
-                return Ok(client.AlbumsByGenre(Guid.Parse(genreid.ToUpper())));
+                return Ok(client.AlbumsByGenre(genreid.ToUpper()));
             }
             return Ok(client.Albums());
         }

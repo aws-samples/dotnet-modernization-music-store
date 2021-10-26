@@ -35,9 +35,9 @@ namespace MvcMusicStore.Service
         }
 
         // Retrieves a genre by its name
-        public Genre GetGenreByName(string genreName)
+        public Genre GetGenre(Guid id)
         {
-            return storeDb.Genres.Include("Albums").Single(g => g.Name == genreName);
+            return storeDb.Genres.Include("Albums").Single(g => g.GenreId == id);
         }
 
         // Retrieves a list of all available Genres

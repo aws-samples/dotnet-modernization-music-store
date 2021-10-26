@@ -36,16 +36,16 @@ namespace MvcMusicStore.Catalog
             return context.Query<GenreModel>("GENRE", QueryOperator.BeginsWith, new[] { "genre#" });
         }
 
-        public GenreModel GenreById(Guid genreId)
+        public GenreModel GenreById(string genreId)
         {
             return context.Query<GenreModel>("GENRE", QueryOperator.Equal, new[] { $"genre#{genreId}" }).FirstOrDefault();
         }
 
-        public AlbumModel AlbumById(Guid id)
+        public AlbumModel AlbumById(string id)
         {
-            return context.Load<AlbumModel>($"album#{id}");
+            return context.Query<AlbumModel>($"album#{id}", QueryOperator.BeginsWith, new[] { $"genre#" }).FirstOrDefault();
         }
-        public IEnumerable<AlbumModel> AlbumsByGenre(Guid genreId)
+        public IEnumerable<AlbumModel> AlbumsByGenre(string genreId)
         {
             return context.Query<AlbumModel>(
                 $"genre#{genreId}",
@@ -63,15 +63,16 @@ namespace MvcMusicStore.Catalog
                new DynamoDBOperationConfig { IndexName = "albums-index" });
         }
 
-        public IEnumerable<AlbumModel> AlbumsByIdList(IEnumerable<Guid> ids)
+        public IEnumerable<AlbumModel> AlbumsByIdList(IEnumerable<string> ids)
         {
-            var albumBatch = context.CreateBatchGet<AlbumModel>();
+            var albums = new List<AlbumModel>();
 
-            ids.ToList().ForEach(i => albumBatch.AddKey(i));
-
-            albumBatch.Execute();
-
-            return albumBatch.Results;
+            foreach (string id in ids)
+            {
+                albums.Add(AlbumById(id));
+            }
+            
+            return albums;
         }
 
     }
