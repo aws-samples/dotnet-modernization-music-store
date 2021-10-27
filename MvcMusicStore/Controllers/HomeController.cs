@@ -26,6 +26,7 @@ namespace MvcMusicStore.Controllers
             // the albums with the highest count
 
             return storeDB.Albums
+                .Where(a => a.OrderDetails.Any())
                 .OrderByDescending(a => a.OrderDetails.Count())
                 .Take(count)
                 .ToList();
