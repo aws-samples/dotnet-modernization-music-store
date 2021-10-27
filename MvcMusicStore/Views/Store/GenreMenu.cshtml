@@ -5,7 +5,7 @@
     {
         <li>@Html.ActionLink(genre.Name, 
                 "Browse", "Store", 
-                new { Genre = genre.Name }, null)
+                new { genreId = genre.GenreId.ToString() }, null)
         </li>
     }
 </ul>

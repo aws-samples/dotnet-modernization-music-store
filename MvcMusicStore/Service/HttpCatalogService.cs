@@ -43,7 +43,7 @@ namespace MvcMusicStore.Service
         // Retrieves a genre by its name
         public Genre GetGenreById(Guid genreId)
         {
-            return httpHelper.MakeHttpCall<List<Genre>>("Genres", null, $"genre={genreId}").FirstOrDefault();
+            return httpHelper.MakeHttpCall<List<Genre>>("Genres", null, $"genreId={genreId}").FirstOrDefault();
         }
 
         // Retrieves a list of all available Genres
