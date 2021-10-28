@@ -8,7 +8,7 @@ namespace MvcMusicStore.CatalogApi.Models
     {
         public string ArtistId { get; set; }
 
-        [DynamoDBProperty("Artist")]
+        [DynamoDBProperty("Title")]
         public string Name { get; set; }
     }
 }

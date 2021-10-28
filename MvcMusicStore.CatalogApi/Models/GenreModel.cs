@@ -13,23 +13,21 @@ namespace MvcMusicStore.CatalogApi.Models
         /// Note: Catalog table holds albums, artists and genres. Using generic partition key name.
         /// </summary>
         [DynamoDBHashKey]
-        [DynamoDBGlobalSecondaryIndexRangeKey]
-        public string PK { get; set; }
+        public string PartitionKey { get; set; }
 
         /// <summary>
         /// Note: Catalog table holds albums, artists and genres. Using generic sort key name.
         /// </summary>
         [DynamoDBRangeKey]
-        [DynamoDBGlobalSecondaryIndexHashKey]
-        public string SK { get; set; }
+        public string SortKey { get; set; }
 
         public Guid GenreId
         {
-            get => _genreId ?? Guid.Parse(PK.Replace("genre#", ""));
+            get => _genreId ?? Guid.Parse(SortKey.Replace("genre#", ""));
             set => _genreId = value;
         }
 
-        [DynamoDBProperty("Genre")]
+        [DynamoDBProperty("Title")]
         public string Name { get; set; }
 
         public string Description { get; set; }
