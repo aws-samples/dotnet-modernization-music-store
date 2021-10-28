@@ -35,41 +35,32 @@ namespace MvcMusicStore.CatalogApi
 
         public IEnumerable<GenreModel> Genres()
         {
-            return context.Query<GenreModel>(
-                "genre",
-                QueryOperator.BeginsWith,
-                new[] { "genre#" },
-                new DynamoDBOperationConfig { IndexName = "sk-pk-index" });
-        }
+            return context.Query<GenreModel>("metadata", QueryOperator.BeginsWith, new[] { "genre#" });
+        }   
 
         public GenreModel GenreById(string genreId)
         {
-            return context.Query<GenreModel>($"genre#{genreId}", QueryOperator.Equal, new[] { "genre" }).FirstOrDefault();
+            return context.Query<GenreModel>("metadata", QueryOperator.Equal, new[] { $"genre#{genreId}" }).FirstOrDefault();
         }
 
         public AlbumModel AlbumById(string id)
         {
-            return context.Query<AlbumModel>($"album#{id}", QueryOperator.BeginsWith, new[] { $"genre#" }).FirstOrDefault();
+            return context.Query<AlbumModel>($"album#{id}", QueryOperator.BeginsWith, new[] { "metadata" }).FirstOrDefault();
         }
         public IEnumerable<AlbumModel> AlbumsByGenre(string genreId)
         {
-            return context.Query<AlbumModel>(
-                $"genre#{genreId}",
-                QueryOperator.BeginsWith,
-                new[] { "album#" },
-                new DynamoDBOperationConfig { IndexName = "sk-pk-index" });
+            return context.Query<AlbumModel>($"genre#{genreId}", QueryOperator.BeginsWith, new[] { "album#" });
         }
 
         public IEnumerable<AlbumModel> AlbumsByIdList(IEnumerable<string> ids)
         {
-            var albums = new List<AlbumModel>();
+            var albumBatch = context.CreateBatchGet<AlbumModel>();
 
-            foreach (string id in ids)
-            {
-                albums.Add(AlbumById(id));
-            }
+            ids.ToList().ForEach(i => albumBatch.AddKey(i, "metadata"));
 
-            return albums;
+            albumBatch.Execute();
+
+            return albumBatch.Results;
         }
 
     }

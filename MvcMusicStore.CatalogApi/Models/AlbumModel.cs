@@ -8,38 +8,29 @@ namespace MvcMusicStore.CatalogApi.Models
     public class AlbumModel
     {
         /// <summary>
-        /// DynamoDB partition Key.
+        /// Partition Key holds either albumId to fetch specific album or genreId to get albums by Genre.
         /// Note: Catalog table holds albums, artists and genres. Using generic partition key name.
-        /// value: album#{albumId}
+        /// Example value: album#{albumId} or genre#{genreId}
         /// </summary>
         [DynamoDBHashKey]
-        [DynamoDBGlobalSecondaryIndexRangeKey]
-        public string PK { get; set; }
+        public string PartitionKey { get; set; }
 
         /// <summary>
-        /// DynamoDb Sort Key.
+        /// DynamoDb Sort Key holds either keywork "metadata" to get album metadata or albumId to get albums by Genre.
         /// Note: Catalog table holds albums, artists and genres. Using generic sort key name.
-        /// value: genre#{genreId}
         /// </summary>
         [DynamoDBRangeKey]
-        [DynamoDBGlobalSecondaryIndexHashKey]
-        public string SK { get; set; }
+        public string SortKey { get; set; }
 
         private Guid? _albumId;
         
-        private Guid? _genreId;
-
         public Guid AlbumId
         {
-            get => _albumId ?? Guid.Parse(PK.Replace("album#", ""));
+            get => _albumId ?? Guid.Parse(PartitionKey.Replace("album#", "").Replace("genre#",""));
             set => _albumId = value;
         }
 
-        public Guid GenreId
-        {
-            get => _genreId ?? Guid.Parse(SK.Replace("genre#", ""));
-            set => _genreId = value;
-        }
+        public Guid GenreId { get; set; }
 
         public Guid ArtistId { get; set; }
 
