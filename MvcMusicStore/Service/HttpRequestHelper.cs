@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web;
-using System.Web.Helpers;
 using System.Text.Json;
 
 namespace MvcMusicStore.Service
@@ -23,6 +19,7 @@ namespace MvcMusicStore.Service
 
         static HttpRequestHelper()
         {
+            // Specify that we always want to receive JSON back from the web service
             httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
         }
 
@@ -35,8 +32,7 @@ namespace MvcMusicStore.Service
                 (!string.IsNullOrEmpty(querystring) ? $"?{querystring}" : "");            
         }
 
-        // Makes synchonous HTTP call, while preventing deadlocks.
-        // Ideally, we would change the entire method chain to async/await.
+        // Makes the HTTP call to the specified Web API
         public T MakeHttpCall<T>(string action, string id = null, string querystring = null)
         {
             var url = GetUrl(action, id, querystring);
