@@ -34,9 +34,9 @@ namespace MvcMusicStore.Service
         }
 
         // Retrieves all the albums for a particular album
-        public List<Album> GetAlbumsByGenre(Guid id)
+        public List<Album> GetAlbumsByGenreName(string name)
         {
-            var albums = httpHelper.MakeHttpCall<List<Album>>("Albums", null, $"genreid={id}");
+            var albums = httpHelper.MakeHttpCall<List<Album>>("Albums", null, $"genreName={name}");
             return albums;
         }
 
