@@ -18,14 +18,14 @@ namespace MvcMusicStore.CatalogApi.Models
         /// Sort key holds artist Name (prepended by artist#) to uniquely identify the Album.
         /// Note: Using generic property name because Catalog table stores albums, artists and genres.
         /// </summary>
-        [DynamoDBRangeKey()]
+        [DynamoDBRangeKey]
         public string SortKey { get; set; }
 
         [DynamoDBGlobalSecondaryIndexHashKey]
         public string GenreName { get; set; }
 
         [DynamoDBGlobalSecondaryIndexHashKey]
-        public Guid AlbumId { get; set; }
+        public string AlbumId { get; set; }
 
         public Guid ArtistId { get; set; }
 
@@ -36,6 +36,8 @@ namespace MvcMusicStore.CatalogApi.Models
         public decimal Price { get; set; }
 
         public string AlbumArtUrl { get; set; }
+
+        public string ObjectType { get; set; }
 
         public GenreModel Genre => new GenreModel { Name = this.GenreName };
 

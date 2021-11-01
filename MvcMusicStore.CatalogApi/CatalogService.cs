@@ -35,26 +35,22 @@ namespace MvcMusicStore.CatalogApi
 
         public IEnumerable<GenreModel> Genres()
         {
-            return context.Query<GenreModel>("GENRE", QueryOperator.BeginsWith, new[] { "genre#" });
+            return context.Query<GenreModel>("GENRE");
         }   
 
-        public GenreModel GenreById(string genreId)
+        public GenreModel GenreByName(string name)
         {
-            return context.Query<GenreModel>("GENRE", QueryOperator.Equal, new[] { $"genre#{genreId}" }).FirstOrDefault();
+            return context.Query<GenreModel>("GENRE", QueryOperator.Equal, new[] { name }).FirstOrDefault();
         }
 
-        public AlbumModel AlbumById(string id)
+        public AlbumModel AlbumById(string albumId)
         {
-            return context.Query<AlbumModel>(
-                $"album#{id}",
-                new DynamoDBOperationConfig { IndexName = "album-by-id" }).FirstOrDefault();
+            return context.Query<AlbumModel>(albumId, new DynamoDBOperationConfig { IndexName = "album-by-id" }).FirstOrDefault();
         }
 
         public IEnumerable<AlbumModel> AlbumsByGenre(string genreName)
         {
-            return context.Query<AlbumModel>(
-               genreName,
-               new DynamoDBOperationConfig { IndexName = "genre-albums" });
+            return context.Query<AlbumModel>(genreName, new DynamoDBOperationConfig { IndexName = "genre-albums" });
         }
 
         public IEnumerable<AlbumModel> AlbumsByIdList(IEnumerable<string> ids)

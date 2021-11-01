@@ -16,15 +16,15 @@ namespace MvcMusicStore.CatalogApi.Controllers
 
         [HttpGet]
         [Route("genres")]
-        public IHttpActionResult Genres(string genreId = null)
+        public IHttpActionResult Genres(string name = null)
         {
-            if (string.IsNullOrEmpty(genreId))
+            if (string.IsNullOrEmpty(name))
             {
                 return Ok(client.Genres());
             }
             else
             {
-                return Ok(new List<GenreModel> { client.GenreById(genreId.ToUpper()) });
+                return Ok(new List<GenreModel> { client.GenreByName(name) });
             }
         }
 
