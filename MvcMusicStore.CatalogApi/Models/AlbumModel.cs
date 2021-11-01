@@ -8,40 +8,37 @@ namespace MvcMusicStore.CatalogApi.Models
     public class AlbumModel
     {
         /// <summary>
-        /// Partition Key holds either albumId to fetch specific album or genreId to get albums by Genre.
-        /// Note: Catalog table holds albums, artists and genres. Using generic partition key name.
-        /// Example value: album#{albumId} or genre#{genreId}
+        /// Partition Key holds AlbumTitle (prepended by album#), example: album#{albumName}
+        /// Note: Using generic property name because Catalog table stores albums, artists and genres.
         /// </summary>
         [DynamoDBHashKey]
         public string PartitionKey { get; set; }
 
         /// <summary>
-        /// DynamoDb Sort Key holds either keywork "metadata" to get album metadata or albumId to get albums by Genre.
-        /// Note: Catalog table holds albums, artists and genres. Using generic sort key name.
+        /// Sort key holds artist Name (prepended by artist#) to uniquely identify the Album.
+        /// Note: Using generic property name because Catalog table stores albums, artists and genres.
         /// </summary>
-        [DynamoDBRangeKey]
+        [DynamoDBRangeKey()]
         public string SortKey { get; set; }
 
-        private Guid? _albumId;
-        
-        public Guid AlbumId
-        {
-            get => _albumId ?? Guid.Parse(PartitionKey.Replace("album#", "").Replace("genre#",""));
-            set => _albumId = value;
-        }
+        [DynamoDBGlobalSecondaryIndexHashKey]
+        public string GenreName { get; set; }
 
-        public Guid GenreId { get; set; }
+        [DynamoDBGlobalSecondaryIndexHashKey]
+        public Guid AlbumId { get; set; }
 
         public Guid ArtistId { get; set; }
 
-        public string Title { get; set; }
+        public string Title => PartitionKey.Replace("album#", "");
+
+        public string ArtistName => SortKey.Replace("artist#", "");
 
         public decimal Price { get; set; }
 
         public string AlbumArtUrl { get; set; }
 
-        public GenreModel Genre { get; set; }
+        public GenreModel Genre => new GenreModel { Name = this.GenreName };
 
-        public ArtistModel Artist { get; set; }
+        public ArtistModel Artist => new ArtistModel { ArtistId = this.ArtistId, Name = this.ArtistName };
     }
 }

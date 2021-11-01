@@ -31,7 +31,7 @@ namespace MvcMusicStore.CatalogApi.Controllers
         // Method expects one or more AlbumIds, comma separated
         [HttpGet]
         [Route("albums")]
-        public IHttpActionResult Albums(string idlist = null, string genreid = null)
+        public IHttpActionResult Albums(string idlist = null, string genreName = null)
         {
             List<AlbumModel> albums = new List<AlbumModel>();
 
@@ -40,9 +40,9 @@ namespace MvcMusicStore.CatalogApi.Controllers
                 var idArray = idlist.ToUpper().Split(',');
                 albums.AddRange(client.AlbumsByIdList(idArray));
             }
-            else if (!string.IsNullOrEmpty(genreid))
+            else if (!string.IsNullOrEmpty(genreName))
             {
-                albums.AddRange(client.AlbumsByGenre(genreid.ToUpper()));
+                albums.AddRange(client.AlbumsByGenre(genreName));
             }
 
             return Ok(albums);

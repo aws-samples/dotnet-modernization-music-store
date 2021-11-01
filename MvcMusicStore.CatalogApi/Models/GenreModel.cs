@@ -7,29 +7,34 @@ namespace MvcMusicStore.CatalogApi.Models
     [DynamoDBTable("Catalog")]
     public class GenreModel
     {
-        private Guid? _genreId;
+        private string _name;
 
         /// <summary>
-        /// Note: Catalog table holds albums, artists and genres. Using generic partition key name.
+        /// Partition Key holds keyword GENRE to get all available Genres.
+        /// Note: Using generic property name because Catalog table stores albums, artists and genres.
         /// </summary>
         [DynamoDBHashKey]
         public string PartitionKey { get; set; }
 
         /// <summary>
-        /// Note: Catalog table holds albums, artists and genres. Using generic sort key name.
+        /// Sort Key holds GenereName.
+        /// Note: Using generic property name because Catalog table stores albums, artists and genres.
         /// </summary>
         [DynamoDBRangeKey]
         public string SortKey { get; set; }
 
-        public Guid GenreId
+        public string Name
         {
-            get => _genreId ?? Guid.Parse(SortKey.Replace("genre#", ""));
-            set => _genreId = value;
+            get
+            {
+                if (!string.IsNullOrEmpty(_name))
+                {
+                    return _name;
+                }
+                return SortKey;
+            }
+            set { _name = value; }
         }
 
-        [DynamoDBProperty("Title")]
-        public string Name { get; set; }
-
-        public string Description { get; set; }
     }
 }
