@@ -28,9 +28,9 @@ namespace MvcMusicStore.Service
         }
 
         // Retrieves all the albums for a particular genre
-        public List<Album> GetAlbumsByGenre(Guid id)
+        public List<Album> GetAlbumsByGenreName(string name)
         {
-            return storeDb.Albums.Where(a => a.GenreId == id).ToList();
+            return storeDb.Albums.Where(a => a.Genre.Name == name).ToList();
         }
 
         // Retrieves a genre by its name

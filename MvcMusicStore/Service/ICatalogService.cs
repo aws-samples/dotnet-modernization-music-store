@@ -8,7 +8,7 @@ namespace MvcMusicStore.Service
     {
         Album GetAlbumById(Guid id);
         List<Album> GetAlbums(List<Guid> ids);
-        List<Album> GetAlbumsByGenre(Guid id);
+        List<Album> GetAlbumsByGenreName(string name);
         Genre GetGenreByName(string name);
         List<Genre> GetGenres();
     }
