@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
 
 namespace MvcMusicStore.CatalogApi.Controllers
@@ -16,33 +17,33 @@ namespace MvcMusicStore.CatalogApi.Controllers
 
         [HttpGet]
         [Route("genres")]
-        public IHttpActionResult Genres(string name = null)
+        public async Task<IHttpActionResult> Genres(string name = null)
         {
             if (string.IsNullOrEmpty(name))
             {
-                return Ok(client.Genres());
+                return Ok(await client.Genres());
             }
             else
             {
-                return Ok(new List<GenreModel> { client.GenreByName(name) });
+                return Ok(new List<GenreModel> { await client.GenreByName(name) });
             }
         }
 
         // Method expects one or more AlbumIds, comma separated
         [HttpGet]
         [Route("albums")]
-        public IHttpActionResult Albums(string idlist = null, string genreName = null)
+        public async Task<IHttpActionResult> Albums(string idlist = null, string genreName = null)
         {
             List<AlbumModel> albums = new List<AlbumModel>();
 
             if (!string.IsNullOrEmpty(idlist))
             {
                 var idArray = idlist.ToUpper().Split(',');
-                albums.AddRange(client.AlbumsByIdList(idArray));
+                albums.AddRange(await client.AlbumsByIdList(idArray) );
             }
             else if (!string.IsNullOrEmpty(genreName))
             {
-                albums.AddRange(client.AlbumsByGenre(genreName));
+                albums.AddRange(await client.AlbumsByGenre(genreName));
             }
 
             return Ok(albums);

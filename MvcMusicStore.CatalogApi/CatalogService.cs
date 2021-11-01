@@ -33,35 +33,44 @@ namespace MvcMusicStore.CatalogApi
             context = new DynamoDBContext(dynamoClient);
         }
 
-        public IEnumerable<GenreModel> Genres()
+        public async Task<IEnumerable<GenreModel>> Genres()
         {
-            return context.Query<GenreModel>("GENRE");
-        }   
+            var queryOperation = context.QueryAsync<GenreModel>("GENRE");
 
-        public GenreModel GenreByName(string name)
-        {
-            return context.Query<GenreModel>("GENRE", QueryOperator.Equal, new[] { name }).FirstOrDefault();
+            return await queryOperation.GetRemainingAsync();
         }
 
-        public AlbumModel AlbumById(string albumId)
+        public async Task<GenreModel> GenreByName(string name)
         {
-            return context.Query<AlbumModel>(albumId, new DynamoDBOperationConfig { IndexName = "album-by-id" }).FirstOrDefault();
+            return await context.LoadAsync<GenreModel>("GENRE", name);
         }
 
-        public IEnumerable<AlbumModel> AlbumsByGenre(string genreName)
+        public async Task<AlbumModel> AlbumById(string albumId)
         {
-            return context.Query<AlbumModel>(genreName, new DynamoDBOperationConfig { IndexName = "genre-albums" });
+            var queryOperation = context.QueryAsync<AlbumModel>(albumId, new DynamoDBOperationConfig { IndexName = "album-by-id" });
+
+            var albums = await queryOperation.GetRemainingAsync();
+
+            return albums.FirstOrDefault();
+
         }
 
-        public IEnumerable<AlbumModel> AlbumsByIdList(IEnumerable<string> ids)
+        public async Task<IEnumerable<AlbumModel>> AlbumsByGenre(string genreName)
+        {
+            var queryOperation = context.QueryAsync<AlbumModel>(genreName, new DynamoDBOperationConfig { IndexName = "genre-albums" });
+
+            return await queryOperation.GetRemainingAsync();
+        }
+
+        public async Task<IEnumerable<AlbumModel>> AlbumsByIdList(IEnumerable<string> ids)
         {
             var albums = new List<AlbumModel>();
 
-            foreach (string id in ids)
+            foreach (string albumId in ids)
             {
-                albums.Add( AlbumById(id) );
+                albums.Add(await AlbumById(albumId));
             }
-
+            
             return albums;
         }
 
