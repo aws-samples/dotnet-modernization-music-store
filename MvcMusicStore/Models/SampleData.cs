@@ -9,6 +9,21 @@ namespace MvcMusicStore.Models
     {
         protected override void Seed(MusicStoreEntities context)
         {
+            // Add view required for DMS job
+            var dmsString = @"CREATE VIEW AlbumsWithArtistAndGenre AS (
+                                SELECT a.*, G.Name as Genre, ar.Name as Artist FROM
+                                    Albums a
+                                  Inner JOIN
+                                    Genres G
+                                  ON
+                                    a.GenreId = g.GenreId
+                                  Inner JOIN
+                                    Artists ar
+                                  ON
+                                    a.ArtistId = ar.ArtistId
+                               );";
+            context.Database.ExecuteSqlCommand(dmsString);
+
             var genres = new List<Genre>
             {
                 new Genre { GenreId = Guid.NewGuid(), Name = "Rock" },
