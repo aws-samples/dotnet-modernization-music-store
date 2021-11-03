@@ -20,13 +20,6 @@ namespace MvcMusicStore.CatalogApi
         DynamoDBContext context;
         AmazonDynamoDBClient dynamoClient;
 
-        // TODO - The "How" of configuring the DynamoDB client should be determined. We are
-        // running this on an EC2 instance with a default profile, and will deploy to EC2 with execution
-        // role. We can probably just use the SDK credentials as supplied in search order - eg through
-        // web.config / appsettings.json
-        //
-        // Note - ideally this would also be all async. We can investigate using the object context
-        // async pattern if we have time.
         public CatalogService()
         {
             dynamoClient = new AmazonDynamoDBClient();

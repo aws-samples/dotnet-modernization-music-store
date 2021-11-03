@@ -29,7 +29,7 @@ namespace MvcMusicStore.CatalogApi.Controllers
             }
         }
 
-        // Method expects one or more AlbumIds, comma separated
+        // Method expects one or more AlbumIds, comma separated or a genre name
         [HttpGet]
         [Route("albums")]
         public async Task<IHttpActionResult> Albums(string idlist = null, string genreName = null)
