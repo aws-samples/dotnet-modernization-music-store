@@ -11,6 +11,10 @@
     <!-- CDK Construct Library dependencies -->
     <PackageReference Include="Amazon.CDK" Version="1.131.0" />
     <PackageReference Include="Amazon.CDK.AWS.CodeCommit" Version="1.131.0" />
+    <PackageReference Include="Amazon.CDK.AWS.DynamoDB" Version="1.131.0" />
+    <PackageReference Include="Amazon.CDK.AWS.EC2" Version="1.131.0" />
+    <PackageReference Include="Amazon.CDK.AWS.ECS" Version="1.131.0" />
+    <PackageReference Include="Amazon.CDK.AWS.ECS.Patterns" Version="1.131.0" />
     <PackageReference Include="Amazon.CDK.Pipelines" Version="1.131.0" />
 
     <!-- jsii Roslyn analyzers (un-comment to obtain compile-time checks for missing required props -->
