@@ -1,5 +1,6 @@
 using Amazon.CDK;
 using Amazon.CDK.AWS.CodeCommit;
+using Amazon.CDK.Pipelines;
 
 namespace MvcMusicStoreInfra
 {
@@ -14,6 +15,28 @@ namespace MvcMusicStoreInfra
             });
 
             new CfnOutput(this, "RepoHTTP", new CfnOutputProps { Value = repo.RepositoryCloneUrlHttp });
+
+
+            var pipeline = new CodePipeline(this, "pipeline", new CodePipelineProps
+            {
+                PipelineName = "MusicStore-Pipeline",
+                Synth = new ShellStep("Synth", new ShellStepProps
+                {
+                    Input = CodePipelineSource.CodeCommit(repo, "strangle-final"),
+                    PrimaryOutputDirectory = "MvcMusicStore.Infra/cdk.out",
+                    InstallCommands = new string[]{
+                        "npm install -g aws-cdk",
+                    },
+                    Commands = new string[] {
+                            "cd MvcMusicStore.Infra",
+                            "dotnet build src",
+                            "cdk synth"
+                        }
+                }),
+
+            });
+
+            pipeline.AddStage(new MusicStoreInfraPipelineStage(this, "Deploy"));
         }
     }
 }
