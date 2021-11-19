@@ -40,7 +40,7 @@ namespace MvcMusicStore.Service
             getTask.Wait();
             var responseTask = getTask.Result.Content.ReadAsStringAsync();
             responseTask.Wait();
-            return JsonSerializer.Deserialize<T>(responseTask.Result);
+            return JsonSerializer.Deserialize<T>(responseTask.Result, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         }
     }
 }
