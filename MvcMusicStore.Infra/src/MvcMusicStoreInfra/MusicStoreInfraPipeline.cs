@@ -12,7 +12,7 @@ namespace MvcMusicStoreInfra
                 PipelineName = "MusicStore-Pipeline",
                 Synth = new ShellStep("Synth", new ShellStepProps
                 {
-                    Input = CodePipelineSource.GitHub("aws-samples/dotnet-modernization-music-store", "XNT306_CatalogAPI_Completed"),
+                    Input = CodePipelineSource.GitHub("aws-samples/dotnet-modernization-music-store", "XNT306_CatalogAPI_CDK_Completed"),
                     PrimaryOutputDirectory = "MvcMusicStore.Infra/cdk.out",
                     InstallCommands = new string[]{
                         "npm install -g aws-cdk",
