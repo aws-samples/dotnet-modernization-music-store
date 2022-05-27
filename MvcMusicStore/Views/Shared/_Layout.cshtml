@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@using MvcMusicStore.Models;
+
+<!DOCTYPE html>
 <html>
 <head>
     <title>@ViewBag.Title</title>
@@ -17,6 +19,10 @@
                 <li><a>Welcome @User.Identity.Name</a></li>
             }
             <li><a href="@Url.Content("~")" id="current">Home</a></li>
+            @{
+                var searchCriteria = (SearchCriteriaModel)this.TempData["SearchCriteria"] ?? new SearchCriteriaModel();
+            }
+            <li>@{Html.RenderPartial("SearchCriteriaPartial", searchCriteria); }</li>
             <li><a href="@Url.Content("~/Store/")">Store</a></li>
             <li>@{Html.RenderAction("CartSummary", "ShoppingCart");}</li>
             @{Html.RenderPartial("_loginPartial"); }
@@ -30,7 +36,7 @@
     </div>
 
     <div id="footer">
-        built with <a href="http://asp.net/mvc">ASP.NET MVC 3</a>
+        built with <a href="http://asp.net/mvc">ASP.NET MVC 5</a>
     </div>
 </body>
 </html>

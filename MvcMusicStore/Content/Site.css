@@ -50,7 +50,7 @@ ul li a
 {
 	overflow: hidden;
 	padding: 0 0 15px 10px;
-	float: left;
+	float: inline-end; /* Fixes ugly shifting down of album list when the list is large */
 }
 
 ul
@@ -125,6 +125,15 @@ ul#album-list li a span
 	font-family: Constantia, Georgia, serif;
 }
 
+/******************** Search Results ************************/
+
+#searchitem {
+	display: inline-block;
+	font-weight: bold;
+	border: 1px solid grey;
+	padding: 2px;
+}
+
 /******************** Top Navigation ************************/
 ul#navlist
 {
@@ -144,6 +153,35 @@ ul#navlist li a
 	color: #8A8575;
 	text-decoration: none;
 	float: left;
+}
+
+
+ul#navlist li #search-box {
+	font-size: 16px;
+	font-weight: bold;
+	border-left: 1px dotted #8A8575;
+	padding: 10px;
+	color: #8A8575;
+	text-decoration: none;
+	float: left;
+}
+
+ul#navlist li #search-box input[type=submit] {
+	padding-top: 3px;
+	padding-bottom: 3px;
+	padding-left: 5px;
+	padding-right: 5px;
+	font-weight: normal;
+	margin-top: 8px;
+}
+
+ul#navlist li #search-box #error-message {
+	font-weight: normal;
+	color: red;
+}
+
+ul#navlist li #search-box input[type=text] {
+	width: 150px;
 }
 
 ul#navlist li:first-child a

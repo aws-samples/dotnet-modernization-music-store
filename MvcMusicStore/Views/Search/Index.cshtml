@@ -1,0 +1,26 @@
+﻿@model MvcMusicStore.ViewModels.SearchResultsViewModel
+
+@{
+    ViewBag.Title = "Search";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@if (Model == null)
+{
+    <h3>Please enter search term at the search box in the top right corner of the screen</h3>
+}
+else
+{
+    <h2>Search Results</h2>
+
+    <h3>Genres</h3>
+    Html.RenderPartial("GenresPartial", Model.Genres);
+    <br />
+
+    <h3>Artists</h3>
+    Html.RenderPartial("ArtistsPartial", Model.Artists);
+    <br />
+
+    <h3>Albums</h3>
+    Html.RenderPartial("AlbumsPartial", Model.Albums);
+}

@@ -1,0 +1,20 @@
+﻿@model IEnumerable<MvcMusicStore.Models.Album>
+
+@if (!Model.Any())
+{
+    <p>No matching albums found</p>
+}
+else
+{
+    <ul id="album-list">
+        @foreach (var album in Model)
+        {
+            <li>
+                <a href="@Url.Action("Details", "Store", new { id = album.AlbumId })">
+                    <img alt="@album.Title" src="@album.AlbumArtUrl" />
+                    <span>@album.Title</span>
+                </a>
+            </li>
+        }
+    </ul>
+}
