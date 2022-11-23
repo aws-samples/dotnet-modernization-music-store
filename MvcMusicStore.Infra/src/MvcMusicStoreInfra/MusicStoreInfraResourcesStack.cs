@@ -7,6 +7,7 @@ using Amazon.CDK.AWS.EC2;
 using Amazon.CDK.AWS.Ecr.Assets;
 using Amazon.CDK.AWS.ECS;
 using Amazon.CDK.AWS.ECS.Patterns;
+using Constructs;
 
 namespace MvcMusicStoreInfra
 {
@@ -46,7 +47,7 @@ namespace MvcMusicStoreInfra
                 Cpu = 512,
                 TaskImageOptions = new ApplicationLoadBalancedTaskImageOptions
                 {
-                    Image = ContainerImage.FromDockerImageAsset(asset), 
+                    Image = ContainerImage.FromDockerImageAsset(asset),
                     Environment = new Dictionary<string, string>()
                         {
                             {"AWS_REGION", this.Region},
