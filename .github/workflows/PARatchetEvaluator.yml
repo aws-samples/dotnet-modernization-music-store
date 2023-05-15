@@ -24,9 +24,12 @@ jobs:
         dotnet-version: 6.0.x
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.1
-
+    - name: Setup Nuget
+      uses: Nuget/setup-nuget@v1.0.5
+    - name: Restore nuget packages
+      run: nuget restore .\MvcMusicStore.sln
     - name: Build sln for analysis
-      run: msbuild MvcMusicStore\MvcMusicStore.csproj -t:rebuild -verbosity:diag -property:Configuration=Release    
+      run: msbuild MvcMusicStore\MvcMusicStore.csproj -t:rebuild -property:Configuration=Release    
     - name: configureawscredentials
       uses: aws-actions/configure-aws-credentials@master
       with:
