@@ -46,7 +46,7 @@ function Extract-Evaluator() {
 function Execute-Porting-Assistant() {
    if(Test-Path ".\PortingAssistant.Client.CLI.exe") {
        New-Item "reports" -ItemType Directory
-       $p = Start-Process -FilePath .\evaluator\PortingAssistant.Client.CLI.exe -ArgumentList "assess -s "MvcMusicStore.sln" -o "reports" -t "net6.0" -Wait -NoNewWindow -PassThru
+       $p = Start-Process -FilePath .\PortingAssistant.Client.CLI.exe -ArgumentList "assess -s MvcMusicStore.sln -o reports" -Wait -NoNewWindow -PassThru
        
        Write-Host "List items"
        Get-ChildItem -Path "reports"
