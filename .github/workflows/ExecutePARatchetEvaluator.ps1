@@ -46,7 +46,7 @@ function Extract-Evaluator() {
 function Execute-Porting-Assistant() {
    if(Test-Path ".\PortingAssistant.Client.CLI.exe") {
        New-Item "reports" -ItemType Directory
-       $p = Start-Process -FilePath .\PortingAssistant.Client.CLI.exe -ArgumentList "assess -s MvcMusicStore.sln -o reports" -Wait -NoNewWindow -PassThru
+       $p = Start-Process -FilePath .\evaluator\PortingAssistant.Client.CLI.exe -ArgumentList "assess -s MvcMusicStore.sln -o reports" -Wait -NoNewWindow -PassThru
        
        Write-Host "List items"
        Get-ChildItem -Path "reports"
@@ -75,7 +75,7 @@ function Main() {
       "bootstrap-porting-assistant" { Bootstrap-Porting-Assistant }
       "execute-porting-assistant" { Execute-Porting-Assistant }
       #"evaluate-results" { Evaluate-Results }
-     #"publish-results" { Publish-Results-to-S3 $githash}
+      #"publish-results" { Publish-Results-to-S3 $githash}
       }
   }
   catch {
