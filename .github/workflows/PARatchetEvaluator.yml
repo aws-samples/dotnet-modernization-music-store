@@ -15,7 +15,7 @@ jobs:
 
   job_1:
     name: Ratchet Evaluator
-    runs-on: windows-latest
+    runs-on: windows-2019
     steps:
     - uses: actions/checkout@v3
     - name: Setup .NET
