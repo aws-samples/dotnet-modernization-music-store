@@ -83,12 +83,8 @@ function Main() {
 
   try {
       Write-Host "Executing process switch" + $process
-
       Switch ($process) {
-      "bootstrap-porting-assistant" { Bootstrap-Porting-Assistant }
-      "execute-porting-assistant" { Execute-Porting-Assistant }
-      "evaluate-results" { Evaluate-Results }
-      "publish-results" { Publish-Results-to-S3 $githash}
+      "fetch-baseline" { Fetch-Baseline $githash}
       }
   }
   catch {
