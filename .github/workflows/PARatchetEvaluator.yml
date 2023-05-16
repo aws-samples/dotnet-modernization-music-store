@@ -48,6 +48,10 @@ jobs:
         ./.github/workflows/ExecutePARatchetEvaluator.ps1 -process "execute-porting-assistant"
     - name: Parse Results
       run: node ./.github/workflows/PARuleParser.js
+    - name: Evaluate Results
+      shell: pwsh
+      run: |
+         ./.github/workflows/ExecutePARatchetEvaluator.ps1 -process "evaluate-results" 
     - name: Publish Results
       shell: pwsh
       run: |
@@ -56,8 +60,5 @@ jobs:
       shell: pwsh
       run: |
          Get-ChildItem -Path .
-    # - name: Evaluate Results
-    #   shell: pwsh
-    #   run: |
-    #     ./.github/workflows/ExecuteRatchetEvaluator.ps1 -process "evaluate-results" 
+
 
