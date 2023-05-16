@@ -6,7 +6,7 @@
       [string]$githash
   )
 
-
+$global:S3_EVALUATOR_PATH = "s3://codebuild-us-east-1-871153927703-output-bucket/evaluator/"
 $global:S3_BASELINE_PATH = "s3://codebuild-us-east-1-871153927703-output-bucket/coderatcheting/config/baseline/master/"
 $global:S3_REPORT_PATH = "s3://codebuild-us-east-1-871153927703-output-bucket/coderatcheting/portingassistant/reports/"
 
@@ -57,6 +57,9 @@ function Fetch-Baseline([string]$githash)
     else
     {
      Write-Host "Baseline not found for the commit ID ${githash}"
+     
+     Write-Host "Download Porting Assistant Client"
+     Sync-File-With-S3 $S3_EVALUATOR_PATH .\evaluator\config "PortingAssistant.Client.CLI.exe"
      Execute-Porting-Assistant
      
     }
