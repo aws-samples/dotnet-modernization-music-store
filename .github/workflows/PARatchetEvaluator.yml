@@ -45,9 +45,9 @@ jobs:
     - name: Execute Porting Assistant
       shell: pwsh
       run: |
+        ./.github/workflows/ExecutePARatchetEvaluator.ps1 -process "execute-porting-assistant"
     - name: Parse Results
       run: node ./.github/workflows/PARuleParser.js
-        ./.github/workflows/ExecutePARatchetEvaluator.ps1 -process "execute-porting-assistant"
     - name: Publish Results
       shell: pwsh
       run: |
