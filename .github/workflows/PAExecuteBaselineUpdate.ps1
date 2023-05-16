@@ -52,7 +52,8 @@ function Fetch-Baseline([string]$githash)
    {
 
      Write-Host "Baseline found for the commit ID ${githash}"
-     Sync-File-With-S3 -source $S3_REPORT_PATH$githash"/current_baseline_PA.json" -destination report -fileName "current_baseline_PA.json"
+     Copy-to-S3 $S3_REPORT_PATH$githash"/current_baseline_PA.json" "$S3_BASELINE_PATH/current_baseline_PA.json"
+
     }
     else
     {
@@ -61,6 +62,8 @@ function Fetch-Baseline([string]$githash)
      Write-Host "Download Porting Assistant Client"
      Sync-File-With-S3 $S3_EVALUATOR_PATH .\evaluator\config "PortingAssistant.Client.CLI.exe"
      Execute-Porting-Assistant
+     node ./.github/workflows/PARuleParser.js
+     Copy-to-S3 "./current_analysis_PA.json" "$S3_BASELINE_PATH/current_baseline_PA.json" 
      
     }
 
