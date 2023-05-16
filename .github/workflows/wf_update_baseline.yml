@@ -41,7 +41,7 @@ jobs:
     - name: Fetch Baseline
       shell: pwsh
       run: |
-        ./.github/workflows/ExecutePABaselineUpdate.ps1 -process "fetch-baseline" -githash ${{github.sha}}
+        ./.github/workflows/PAExecuteBaselineUpdate.ps1 -process "fetch-baseline" -githash ${{github.sha}}
     - name: List items
       shell: pwsh
       run: |
