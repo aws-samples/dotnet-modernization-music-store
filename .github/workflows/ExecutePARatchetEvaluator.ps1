@@ -85,7 +85,7 @@ function Main() {
       "bootstrap-porting-assistant" { Bootstrap-Porting-Assistant }
       "execute-porting-assistant" { Execute-Porting-Assistant }
       #"evaluate-results" { Evaluate-Results }
-      #"publish-results" { Publish-Results-to-S3 $githash}
+      "publish-results" { Publish-Results-to-S3 $githash}
       }
   }
   catch {
