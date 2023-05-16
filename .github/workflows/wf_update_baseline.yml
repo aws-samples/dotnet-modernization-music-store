@@ -38,15 +38,18 @@ jobs:
         role-to-assume: arn:aws:iam::871153927703:role/github-actions-role
         role-session-name: samplerolesession
         aws-region: ${{env.AWS_DEFAULT_REGION}}
-    - name: Bootstrap Porting Assistant
-      shell: pwsh
-      run: |
-        ./.github/workflows/ExecutePARatchetEvaluator.ps1 -process "bootstrap-porting-assistant"    
-    - name: Execute Porting Assistant
-      shell: pwsh
-      run: |
-        ./.github/workflows/ExecutePARatchetEvaluator.ps1 -process "execute-porting-assistant"
     - name: Fetch Baseline
       shell: pwsh
       run: |
         ./.github/workflows/ExecutePABaselineUpdate.ps1 -process "fetch-baseline" -githash ${{github.sha}}
+    
+    - name: Parse Results
+      run: node ./.github/workflows/PARuleParser.js
+    - name: Publish Results
+      shell: pwsh
+      run: |
+        ./.github/workflows/ExecutePABaselineUpdate.ps1 -process "publish-results" -githash ${{github.sha}}
+    - name: List items
+      shell: pwsh
+      run: |
+         Get-ChildItem -Path .
