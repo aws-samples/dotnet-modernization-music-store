@@ -45,13 +45,13 @@ jobs:
     - name: Execute Porting Assistant
       shell: pwsh
       run: |
+    - name: Parse Results
+      run: node ./.github/workflows/PARuleParser.js
         ./.github/workflows/ExecutePARatchetEvaluator.ps1 -process "execute-porting-assistant"
     - name: Publish Results
       shell: pwsh
       run: |
         ./.github/workflows/ExecutePARatchetEvaluator.ps1 -process "publish-results" -githash ${{github.sha}}
-    - name: Parse Results
-      run: node ./.github/workflows/PARuleParser.js
     - name: List items
       shell: pwsh
       run: |
