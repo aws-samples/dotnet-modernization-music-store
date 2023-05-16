@@ -58,6 +58,15 @@ function Execute-Porting-Assistant() {
    }
 }
 
+function Publish-Results-to-S3([string] $githash) {
+     Copy-to-S3 "./MvcMusicStore-analyze/solution-analyze/MvcMusicStore/MvcMusicStore-api-analysis.json" "$S3_REPORT_PATH$githash/current_baseline_PA.json" 
+}
+
+function Copy-to-S3([string]$source, [string]$destination) {
+     Write-Host "Syncing from $source to $destination"
+     aws s3 cp $source $destination --sse "AES256"
+}
+
 function Main() {
   param(
       [Parameter()]
