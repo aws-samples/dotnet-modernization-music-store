@@ -38,9 +38,6 @@ function Extract-Evaluator() {
      
      Write-Host "Download baseline file"
      Sync-File-With-S3 $S3_BASELINE_PATH .\evaluator\config "current_baseline_PA.json"
-
-     Write-Host "List items"
-     Get-ChildItem -Path "evaluator"
 }
 
 function Execute-Porting-Assistant() {
@@ -66,7 +63,9 @@ function Copy-to-S3([string]$source, [string]$destination) {
 
 function Evaluate-Results() {
     Write-Host "Evaluating the result with current baseline for Porting Assistant Engine"
-    $p = Start-Process -FilePath .\Evaluator\CodeRatchetingEvaluator.exe -ArgumentList "parse --baseline .\evaluator\config\current_baseline_PA.json --compareWith .\current_analysis_PA.json --configFile .\evaluator\config\ratchet_config.yml --tool porting-assistant" -Wait -NoNewWindow -PassThru
+    Write-Host "List items"
+    Get-ChildItem -Path "evaluator" -Recurse
+    $p = Start-Process -FilePath .\evaluator\CodeRatchetingEvaluator.exe -ArgumentList "parse --baseline .\evaluator\config\current_baseline_PA.json --compareWith .\current_analysis_PA.json --configFile .\evaluator\config\ratchet_config.yml --tool porting-assistant" -Wait -NoNewWindow -PassThru
     if($q.ExitCode)
      {
       Write-Error "Ratchet detected, Failing build..."
