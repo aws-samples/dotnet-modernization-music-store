@@ -1,0 +1,52 @@
+# Porting Assistant Engine - Update Baseline
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: Porting Assistant Engine - Update Master Baseline
+
+on: [workflow_dispatch]
+
+env:
+      AWS_DEFAULT_REGION: us-east-1
+     
+permissions:
+      id-token: write   # This is required for requesting the JWT
+      contents: read    # This is required for actions/checkout
+
+jobs:
+  job_1:
+    name: Baseline Update
+    runs-on: windows-2019
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 6.0.x
+    - name: Setup Node.js environment
+      uses: actions/setup-node@v2.5.2    
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.1
+    - name: Setup Nuget
+      uses: Nuget/setup-nuget@v1.0.5
+    - name: Restore nuget packages
+      run: nuget restore .\MvcMusicStore.sln
+    - name: Build sln for analysis
+      run: msbuild MvcMusicStore\MvcMusicStore.csproj -t:rebuild -property:Configuration=Release    
+    - name: configureawscredentials
+      uses: aws-actions/configure-aws-credentials@master
+      with:
+        role-to-assume: arn:aws:iam::871153927703:role/github-actions-role
+        role-session-name: samplerolesession
+        aws-region: ${{env.AWS_DEFAULT_REGION}}
+    - name: Bootstrap Porting Assistant
+      shell: pwsh
+      run: |
+        ./.github/workflows/ExecutePARatchetEvaluator.ps1 -process "bootstrap-porting-assistant"    
+    - name: Execute Porting Assistant
+      shell: pwsh
+      run: |
+        ./.github/workflows/ExecutePARatchetEvaluator.ps1 -process "execute-porting-assistant"
+    - name: Fetch Baseline
+      shell: pwsh
+      run: |
+        ./.github/workflows/ExecutePABaselineUpdate.ps1 -process "fetch-baseline" -githash ${{github.sha}}
