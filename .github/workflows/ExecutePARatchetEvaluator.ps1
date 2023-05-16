@@ -34,17 +34,23 @@ function Extract-Evaluator() {
      Expand-Archive -LiteralPath "coderatchetingevaluatorV2.zip" -DestinationPath .\evaluator 
 
      Write-Host "Download Porting Assistant Client"
-     Sync-File-With-S3 $S3_EVALUATOR_PATH .\evaluator "PortingAssistant.Client.CLI.exe"
+     Sync-File-With-S3 $S3_EVALUATOR_PATH .\evaluator\config "PortingAssistant.Client.CLI.exe"
      
      Write-Host "Download baseline file"
      Sync-File-With-S3 $S3_BASELINE_PATH .\evaluator\config "current_baseline_PA.json"
+     
+     Write-Host "Download config file"
+     Sync-File-With-S3 $S3_EVALUATOR_PATH .\evaluator\config "ratchet_config.yml"
+     
+     Write-Host "List items"
+     Get-ChildItem -Path "evaluator" -Recurse
 }
 
 function Execute-Porting-Assistant() {
-   if(Test-Path ".\evaluator\PortingAssistant.Client.CLI.exe") {
+   if(Test-Path ".\evaluator\config\PortingAssistant.Client.CLI.exe") {
        #New-Item "reports" -ItemType Directory
        #$p = Start-Process -FilePath .\evaluator\PortingAssistant.Client.CLI.exe -ArgumentList "assess -s MvcMusicStore.sln -o reports" -Wait -NoNewWindow -PassThru
-       .\evaluator\PortingAssistant.Client.CLI.exe assess --solution-path=D:\a\dotnet-modernization-music-store\dotnet-modernization-music-store\MvcMusicStore.sln --output-path=.
+       .\evaluator\config\PortingAssistant.Client.CLI.exe assess --solution-path=D:\a\dotnet-modernization-music-store\dotnet-modernization-music-store\MvcMusicStore.sln --output-path=.
    }
    else {
        Write-Error ".\PortingAssistant.Client.CLI.exe not found"
@@ -63,14 +69,12 @@ function Copy-to-S3([string]$source, [string]$destination) {
 
 function Evaluate-Results() {
     Write-Host "Evaluating the result with current baseline for Porting Assistant Engine"
-    Write-Host "List items"
-    Get-ChildItem -Path "evaluator" -Recurse
-    $p = Start-Process -FilePath .\evaluator\coderatchetingevaluator\CodeRatchetingEvaluator.exe -ArgumentList "parse --baseline .\evaluator\config\current_baseline_PA.json --compareWith .\current_analysis_PA.json --configFile .\evaluator\coderatchetingevaluator\config\ratchet_config.yml --tool porting-assistant" -Wait -NoNewWindow -PassThru
-    # if($q.ExitCode)
-    #  {
-    #   Write-Error "Ratchet detected, Failing build..."
-    #   Exit 1
-    #  }
+    $p = Start-Process -FilePath .\evaluator\coderatchetingevaluator\CodeRatchetingEvaluator.exe -ArgumentList "parse --baseline .\evaluator\config\current_baseline_PA.json --compareWith .\current_analysis_PA.json --configFile .\evaluator\config\ratchet_config.yml --tool porting-assistant" -Wait -NoNewWindow -PassThru
+     if($q.ExitCode)
+      {
+       Write-Error "Ratchet detected, Failing build..."
+       Exit 1
+      }
 }
 
 function Main() {
