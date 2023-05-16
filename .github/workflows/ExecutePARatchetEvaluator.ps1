@@ -45,12 +45,9 @@ function Extract-Evaluator() {
 
 function Execute-Porting-Assistant() {
    if(Test-Path ".\evaluator\PortingAssistant.Client.CLI.exe") {
-       New-Item "reports" -ItemType Directory
+       #New-Item "reports" -ItemType Directory
        #$p = Start-Process -FilePath .\evaluator\PortingAssistant.Client.CLI.exe -ArgumentList "assess -s MvcMusicStore.sln -o reports" -Wait -NoNewWindow -PassThru
        .\evaluator\PortingAssistant.Client.CLI.exe assess --solution-path=D:\a\dotnet-modernization-music-store\dotnet-modernization-music-store\MvcMusicStore.sln --output-path=.
-
-       Write-Host "List items"
-       Get-ChildItem -Path "reports"
    }
    else {
        Write-Error ".\PortingAssistant.Client.CLI.exe not found"
@@ -59,7 +56,7 @@ function Execute-Porting-Assistant() {
 }
 
 function Publish-Results-to-S3([string] $githash) {
-     Copy-to-S3 "./MvcMusicStore-analyze/solution-analyze/MvcMusicStore/MvcMusicStore-api-analysis.json" "$S3_REPORT_PATH$githash/current_baseline_PA.json" 
+     Copy-to-S3 "./current_analysis_PA.json" "$S3_REPORT_PATH$githash/current_baseline_PA.json" 
 }
 
 function Copy-to-S3([string]$source, [string]$destination) {
