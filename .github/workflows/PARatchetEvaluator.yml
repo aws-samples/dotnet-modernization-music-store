@@ -55,4 +55,4 @@ jobs:
     - name: Publish Results
       shell: pwsh
       run: |
-        ./.github/workflows/ExecuteRatchetEvaluator.ps1 -process "publish-results" -githash ${{github.sha}}
+        ./.github/workflows/ExecutePARatchetEvaluator.ps1 -process "publish-results" -githash ${{github.sha}}
