@@ -42,13 +42,6 @@ jobs:
       shell: pwsh
       run: |
         ./.github/workflows/ExecutePABaselineUpdate.ps1 -process "fetch-baseline" -githash ${{github.sha}}
-    
-    - name: Parse Results
-      run: node ./.github/workflows/PARuleParser.js
-    - name: Publish Results
-      shell: pwsh
-      run: |
-        ./.github/workflows/ExecutePABaselineUpdate.ps1 -process "publish-results" -githash ${{github.sha}}
     - name: List items
       shell: pwsh
       run: |
