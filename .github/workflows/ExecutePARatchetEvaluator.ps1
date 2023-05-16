@@ -65,7 +65,7 @@ function Evaluate-Results() {
     Write-Host "Evaluating the result with current baseline for Porting Assistant Engine"
     Write-Host "List items"
     Get-ChildItem -Path "evaluator" -Recurse
-    $p = Start-Process -FilePath .\evaluator\CodeRatchetingEvaluator.exe -ArgumentList "parse --baseline .\evaluator\config\current_baseline_PA.json --compareWith .\current_analysis_PA.json --configFile .\evaluator\config\ratchet_config.yml --tool porting-assistant" -Wait -NoNewWindow -PassThru
+    $p = Start-Process -FilePath .\evaluator\coderatchetingevaluator\CodeRatchetingEvaluator.exe -ArgumentList "parse --baseline .\evaluator\config\current_baseline_PA.json --compareWith .\current_analysis_PA.json --configFile .\evaluator\coderatchetingevaluator\config\ratchet_config.yml --tool porting-assistant" -Wait -NoNewWindow -PassThru
     # if($q.ExitCode)
     #  {
     #   Write-Error "Ratchet detected, Failing build..."
