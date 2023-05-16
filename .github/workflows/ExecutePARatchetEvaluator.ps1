@@ -37,7 +37,7 @@ function Extract-Evaluator() {
      Sync-File-With-S3 $S3_EVALUATOR_PATH .\evaluator "PortingAssistant.Client.CLI.exe"
      
      Write-Host "Download baseline file"
-     Sync-File-With-S3 $S3_BASELINE_PATH .\evaluator "current_baseline_PA.json"
+     Sync-File-With-S3 $S3_BASELINE_PATH .\evaluator\config "current_baseline_PA.json"
 
      Write-Host "List items"
      Get-ChildItem -Path "evaluator"
@@ -64,6 +64,16 @@ function Copy-to-S3([string]$source, [string]$destination) {
      aws s3 cp $source $destination --sse "AES256"
 }
 
+function Evaluate-Results() {
+    Write-Host "Evaluating the result with current baseline for Porting Assistant Engine"
+    $p = Start-Process -FilePath .\Evaluator\CodeRatchetingEvaluator.exe -ArgumentList "parse --baseline .\evaluator\config\current_baseline_PA.json --compareWith .\current_analysis_PA.json --configFile .\evaluator\config\ratchet_config.yml --tool porting-assistant" -Wait -NoNewWindow -PassThru
+    if($q.ExitCode)
+     {
+      Write-Error "Ratchet detected, Failing build..."
+      Exit 1
+     }
+}
+
 function Main() {
   param(
       [Parameter()]
@@ -81,7 +91,7 @@ function Main() {
       Switch ($process) {
       "bootstrap-porting-assistant" { Bootstrap-Porting-Assistant }
       "execute-porting-assistant" { Execute-Porting-Assistant }
-      #"evaluate-results" { Evaluate-Results }
+      "evaluate-results" { Evaluate-Results }
       "publish-results" { Publish-Results-to-S3 $githash}
       }
   }
