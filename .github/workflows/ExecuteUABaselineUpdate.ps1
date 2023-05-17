@@ -85,7 +85,7 @@ function Install-Dependencies() {
 
 function Execute-Upgrade-Assistant() {
       Write-Host "Executing upgrade-assistant"
-      $p = Start-Process -FilePath upgrade-assistant.exe -ArgumentList "analyze --target-tfm-support LTS aspnetapp.csproj" -Wait -NoNewWindow -PassThru
+      $p = Start-Process -FilePath upgrade-assistant.exe -ArgumentList "analyze --target-tfm-support LTS .\MvcMusicStore\MvcMusicStore.csproj" -Wait -NoNewWindow -PassThru
       if ($p.ExitCode)
       {
         Write-Error "Failed to run upgrade assistant"
