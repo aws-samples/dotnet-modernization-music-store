@@ -31,8 +31,8 @@ jobs:
     - name: Install Dependencies
       shell: pwsh
       run: |
-        ./.github/workflows/ExecuteBaselineUpdate.ps1 -process "install-dependencies" 
+        ./.github/workflows/ExecuteUABaselineUpdate.ps1 -process "install-dependencies" 
     - name: Fetch Baseline
       shell: pwsh
       run: |
-        ./.github/workflows/ExecuteBaselineUpdate.ps1 -process "fetch-baseline" -githash ${{github.sha}}
+        ./.github/workflows/ExecuteUABaselineUpdate.ps1 -process "fetch-baseline" -githash ${{github.sha}}
