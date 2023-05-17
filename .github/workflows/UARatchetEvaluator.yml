@@ -1,0 +1,51 @@
+# Upgrade Assistant Engine
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: Upgrade Assistant Engine - Ratchet Evaluator
+
+on: [workflow_dispatch]
+
+env:
+      AWS_DEFAULT_REGION: us-east-1
+     
+permissions:
+      id-token: write   # This is required for requesting the JWT
+      contents: read    # This is required for actions/checkout
+
+jobs:
+
+  job_1:
+    name: Ratchet Evaluator
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 6.0.x
+    - name: configureawscredentials
+      uses: aws-actions/configure-aws-credentials@master
+      with:
+        role-to-assume: arn:aws:iam::871153927703:role/github-actions-role
+        role-session-name: samplerolesession
+        aws-region: ${{env.AWS_DEFAULT_REGION}}
+    - name: Extract Evaluator
+      shell: pwsh
+      run: |
+        ./.github/workflows/ExecuteRatchetEvaluator.ps1 -process "extract-evaluator" 
+    - name: Install Dependencies
+      shell: pwsh
+      run: |
+        ./.github/workflows/ExecuteRatchetEvaluator.ps1 -process "install-dependencies"     
+    - name: Execute Upgrade Assistant
+      shell: pwsh
+      run: |
+        ./.github/workflows/ExecuteRatchetEvaluator.ps1 -process "execute-upgrade-assistant" 
+    - name: Evaluate Results
+      shell: pwsh
+      run: |
+        ./.github/workflows/ExecuteRatchetEvaluator.ps1 -process "evaluate-results" 
+    - name: Publish Results
+      shell: pwsh
+      run: |
+        ./.github/workflows/ExecuteRatchetEvaluator.ps1 -process "publish-results" -githash ${{github.sha}}
