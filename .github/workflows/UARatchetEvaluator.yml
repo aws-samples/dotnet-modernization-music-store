@@ -32,20 +32,20 @@ jobs:
     - name: Extract Evaluator
       shell: pwsh
       run: |
-        ./.github/workflows/ExecuteRatchetEvaluator.ps1 -process "extract-evaluator" 
+        ./.github/workflows/ExecuteUARatchetEvaluator.ps1 -process "extract-evaluator" 
     - name: Install Dependencies
       shell: pwsh
       run: |
-        ./.github/workflows/ExecuteRatchetEvaluator.ps1 -process "install-dependencies"     
+        ./.github/workflows/ExecuteUARatchetEvaluator.ps1 -process "install-dependencies"     
     - name: Execute Upgrade Assistant
       shell: pwsh
       run: |
-        ./.github/workflows/ExecuteRatchetEvaluator.ps1 -process "execute-upgrade-assistant" 
+        ./.github/workflows/ExecuteUARatchetEvaluator.ps1 -process "execute-upgrade-assistant" 
     - name: Evaluate Results
       shell: pwsh
       run: |
-        ./.github/workflows/ExecuteRatchetEvaluator.ps1 -process "evaluate-results" 
+        ./.github/workflows/ExecuteUARatchetEvaluator.ps1 -process "evaluate-results" 
     - name: Publish Results
       shell: pwsh
       run: |
-        ./.github/workflows/ExecuteRatchetEvaluator.ps1 -process "publish-results" -githash ${{github.sha}}
+        ./.github/workflows/ExecuteUARatchetEvaluator.ps1 -process "publish-results" -githash ${{github.sha}}
