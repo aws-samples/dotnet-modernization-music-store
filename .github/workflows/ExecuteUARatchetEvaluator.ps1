@@ -111,6 +111,9 @@ function Extract-Evaluator() {
 
      Write-Host "Download baseline file"
      Sync-File-With-S3 $S3_BASELINE_PATH .\evaluator "current_baseline_UA.json"
+     
+     Write-Host "Download config file"
+     Sync-File-With-S3 $S3_EVALUATOR_PATH .\evaluator\config "ratchet_config.yml"
 
      Write-Host "List items"
      Get-ChildItem -Path "evaluator"
