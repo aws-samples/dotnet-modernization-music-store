@@ -105,7 +105,7 @@ function Extract-Evaluator() {
     }
     
      Write-Host "Download Evaluator"
-     Sync-File-With-S3 $S3_EVALUATOR_PATH .\ "coderatchetingevaluator.zip"
+     Sync-File-With-S3 $S3_EVALUATOR_PATH .\ "coderatchetingevaluatorV2.zip"
      Expand-Archive -LiteralPath "coderatchetingevaluatorV2.zip" -DestinationPath .\evaluator
      
 
