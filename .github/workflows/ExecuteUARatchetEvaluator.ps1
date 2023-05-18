@@ -77,7 +77,7 @@ function Sync-File-With-S3([string]$source,[string]$destination, [string]$fileNa
 function Evaluate-Results() {
      Generate-Analysis-Report -outputFileName "current_analysis_UA"
      Write-Host "Evaluating current analysis with master baseline"
-     $q = Start-Process -FilePath .\evaluator\CodeRatchetingEvaluator.exe -ArgumentList "parse --baseline .\evaluator\current_baseline_UA.json --compareWith .\report\current_analysis_UA.json --configFile .\evaluator\config\ratchet_config.yml --tool porting-assistant" -Wait -NoNewWindow -PassThru
+     $q = Start-Process -FilePath .\evaluator\coderatchetingevaluator\CodeRatchetingEvaluator.exe -ArgumentList "parse --baseline .\evaluator\current_baseline_UA.json --compareWith .\report\current_analysis_UA.json --configFile .\evaluator\config\ratchet_config.yml --tool porting-assistant" -Wait -NoNewWindow -PassThru
 #      if($q.ExitCode)
 #      {
 #       Write-Error "Ratchet detected, Failing build..."
