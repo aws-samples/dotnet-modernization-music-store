@@ -3,7 +3,10 @@
 
 name: Upgrade Assistant Engine - Update Master Baseline
 
-on: [workflow_dispatch]
+on:
+  push:
+    branches:
+      - 'main'
 
 env:
       AWS_DEFAULT_REGION: us-east-1
