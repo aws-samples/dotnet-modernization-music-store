@@ -2,7 +2,8 @@
 
 name: Porting Assistant Engine - Ratchet Evaluator
 
-on: [workflow_dispatch]
+on: 
+  pull_request:
 
 env:
       AWS_DEFAULT_REGION: us-east-1
