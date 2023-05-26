@@ -18,6 +18,11 @@ namespace MvcMusicStore.Controllers
         {
             return View();
         }
+        
+        public ActionResult ReturnNothing()
+        {
+            return null();
+        }
 
         //
         // POST: /Checkout/AddressAndPayment
